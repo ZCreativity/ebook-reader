@@ -1,10 +1,9 @@
-use crate::helper::config::{PADDING_LG, TITLE};
+use crate::helper::config::{ PADDING_LG, TITLE};
 use crate::model::book::Book;
 use crate::model::library::Library;
 use crate::{AppState, APP_NAME};
-use druid::widget::{Button, Flex, Label, List, MainAxisAlignment, Padding};
-use druid::{Insets, Widget, WidgetExt, LensExt, Env, EventCtx};
-use crate::model::app_state;
+use druid::widget::{Button, FillStrat, Flex, Image, Label, List, MainAxisAlignment, Padding};
+use druid::{Insets, Widget, WidgetExt, LensExt, ImageBuf};
 
 /** Notes on Data and Lens.
    Il tratto Lens permette di accedere ad una porzione di una struttura dati
@@ -42,5 +41,8 @@ fn header() -> impl Widget<AppState> {
 /* Book item */
 fn book_item() -> impl Widget<Book> {
     let title = Label::raw().lens(Book::title);
-    Flex::column().with_child(title)
+    let image_buf = ImageBuf::from_data(include_bytes!("../../library/covers/Notre-Dame-De-Paris.png")).unwrap();
+    // TODO: Come cazzo si fa
+    let image = Image::new(image_buf).fill_mode(FillStrat::Contain).fix_size(150.0, 250.0);
+    Flex::column().with_child(title).with_child(image)
 }

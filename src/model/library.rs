@@ -3,7 +3,6 @@ use crate::helper::functions::open_native_dialog;
 use druid::{Data, Lens};
 use std::fs;
 use std::fs::ReadDir;
-use std::sync::Arc;
 use druid::im::Vector;
 use crate::model::book::Book;
 use crate::controller::doc_controller::DocController;
@@ -35,9 +34,7 @@ impl Library {
             for file in dir.unwrap() {
                 let book = DocController::epub_to_book(file.as_ref().unwrap().path());
                 match book {
-                    None => {
-                        eprintln!("Unable to add book {}", file.unwrap().path().display());
-                    }
+                    None => { eprintln!("Unable to add book {}", file.unwrap().path().display()); }
                     Some(book) => { book_list.push_back(book); }
                 }
             }
@@ -58,7 +55,7 @@ impl Library {
             None => {
                 println!("No book selected");
                 return;
-            } //TODO: Handle error
+            }
             Some(path) => path,
         };
 
