@@ -2,8 +2,9 @@ use crate::helper::config::{PADDING_LG, TITLE};
 use crate::model::book::Book;
 use crate::model::library::Library;
 use crate::{AppState, APP_NAME};
-use druid::widget::{Button, Flex, Label, List, MainAxisAlignment, Padding};
-use druid::{Insets, Widget, WidgetExt, LensExt, Env, EventCtx};
+use druid::widget::{Button, Click, Container, ControllerHost, Flex, Label, List, MainAxisAlignment, Padding};
+use druid::{Insets, Widget, WidgetExt, LensExt, Env, EventCtx, Color, KeyOrValue};
+use druid::theme::BORDER_LIGHT;
 use crate::model::app_state;
 
 /** Notes on Data and Lens.
@@ -41,6 +42,16 @@ fn header() -> impl Widget<AppState> {
 
 /* Book item */
 fn book_item() -> impl Widget<Book> {
+
     let title = Label::raw().lens(Book::title);
-    Flex::column().with_child(title)
+    let container = Container::new(Flex::column().with_child(title)).rounded(PADDING_LG).padding(PADDING_LG).border(BORDER_LIGHT, 2.0);
+
+    // Clickable widget needs click controller and controller host
+    let click_controller = Click::new(|_ctx, data: &mut Book, _env| {
+        // TODO: Open new window with book data
+       println!("Clicked book {}", data.get_title())
+    });
+    let controller_host = ControllerHost::new(container, click_controller);
+
+    controller_host
 }
