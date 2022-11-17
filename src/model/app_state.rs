@@ -1,6 +1,5 @@
-use druid::{Data, EventCtx, Lens};
 use crate::model::library::Library;
-
+use druid::{Data, Lens};
 
 #[derive(Data, Clone, Lens)]
 pub struct AppState {
@@ -9,7 +8,9 @@ pub struct AppState {
 
 impl AppState {
     pub fn new() -> Self {
-        Self { library: Library::new() }
+        Self {
+            library: Library::new(),
+        }
     }
 
     pub fn add_book(&mut self) {

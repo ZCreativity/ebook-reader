@@ -44,4 +44,8 @@ impl Book {
             None => None,
         }
     }
+
+    // pub fn get_title(&self) -> String {
+    //     self.title.clone()
+    // }
 }
