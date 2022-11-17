@@ -1,14 +1,19 @@
-mod ui;
 mod helper;
+mod model;
+mod view;
+mod controller;
 
-use crate::ui::home::*;
-
+use crate::helper::config::{APP_NAME, DISPLAY_HEIGHT, DISPLAY_WIDTH};
 use druid::{AppLauncher, PlatformError, WindowDesc};
-use crate::helper::config::{APP_NAME, DISPLAY_HEIGTH, DISPLAY_WIDTH};
+use crate::model::app_state::AppState;
+use crate::view::home::ui::build_ui;
 
 fn main() -> Result<(), PlatformError> {
-    let main_window = WindowDesc::new(home_page_ui::ui_builder)
-        .window_size((DISPLAY_WIDTH, DISPLAY_HEIGTH))
+
+    let app_state: AppState = AppState::new();
+
+    let main_window = WindowDesc::new(|| build_ui())
+        .window_size((DISPLAY_WIDTH, DISPLAY_HEIGHT))
         .title(APP_NAME);
-    AppLauncher::with_window(main_window).launch(())
+    AppLauncher::with_window(main_window).launch(app_state)
 }
