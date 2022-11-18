@@ -1,6 +1,7 @@
 use druid::{Data, ImageBuf, Lens};
 use epub::doc::EpubDoc;
 use std::fs::File;
+use std::io::BufReader;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
@@ -10,11 +11,11 @@ use crate::helper::functions::path_to_bytes;
 pub struct Book {
     title: String,
     cover: Option<Arc<ImageBuf>>,
-    doc: Arc<Mutex<EpubDoc<File>>>,
+    doc: Arc<Mutex<EpubDoc<BufReader<File>>>>,
 }
 
 impl Book {
-    pub fn new(doc: EpubDoc<File>, title: String, cover_path: String) -> Self {
+    pub fn new(doc: EpubDoc<BufReader<File>>, title: String, cover_path: String) -> Self {
         // Extract cover image from cover_path
         let cover = if cover_path.is_empty() {
             None
