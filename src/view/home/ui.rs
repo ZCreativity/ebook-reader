@@ -1,10 +1,13 @@
+use std::sync::Arc;
 use crate::helper::config::{COVER_PLACEHOLDER, PADDING_LG, TITLE};
 use crate::model::book::Book;
 use crate::model::library::Library;
 use crate::{AppState, APP_NAME};
-use druid::widget::{Button, Flex, Label, List, MainAxisAlignment, Padding};
+use druid::widget::{Button, Flex, Label, List, MainAxisAlignment, Padding, RawLabel};
 use druid::widget::{FillStrat, Image, Scroll, Svg, ViewSwitcher};
-use druid::{Insets, LensExt, Widget, WidgetExt};
+use druid::{ArcStr, Insets, LensExt, TextLayout, Widget, WidgetExt};
+use druid::text::{Attribute, RichText};
+use druid::Color;
 
 /** Notes on Data and Lens.
    Il tratto Lens permette di accedere ad una porzione di una struttura dati
@@ -22,8 +25,12 @@ pub fn build_ui() -> impl Widget<AppState> {
     let books_list = Scroll::new(List::new(book_item))
         .vertical()
         .lens(AppState::library.then(Library::books)); // Lens chaining
+    let books_texts = Scroll::new(List::new(book_text))
+        .vertical()
+        .lens(AppState::library.then(Library::books));
     let layout = Flex::column()
         .with_child(header)
+        .with_child(books_texts)
         .with_child(books_list)
         .fix_height(500.0);
     Padding::new(
@@ -74,4 +81,15 @@ fn book_item() -> impl Widget<Book> {
         },
     ));
     Flex::column().with_child(title).with_child(cover)
+}
+
+fn book_text() -> impl Widget<Book> {
+    //Creo un buffer con dentro il testo semplice (stringa)
+    let buf = ArcStr::from("Porco dio!");
+    //Creo RichText con attributi
+    //Range dice da che posto devo partire ad applicare l'attributo a dove, con 0.. dovrebbe fare dall'inizio alla fine
+    let rich = RichText::new(buf.clone()).with_attribute(0.., Attribute::text_color(Color::LIME));
+    //TODO: How to use rich in a Label ?
+    let text = Label::new(buf).with_text_color(Color::LIME); //Prova Colori
+    Flex::column().with_child(text)
 }
