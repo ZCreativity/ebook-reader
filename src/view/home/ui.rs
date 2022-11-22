@@ -1,3 +1,5 @@
+use std::fs::metadata;
+use std::ops::Deref;
 use std::sync::Arc;
 use crate::helper::config::{COVER_PLACEHOLDER, PADDING_LG, TITLE};
 use crate::model::book::Book;
@@ -8,6 +10,7 @@ use druid::widget::{FillStrat, Image, Scroll, Svg, ViewSwitcher};
 use druid::{ArcStr, Insets, LensExt, TextLayout, Widget, WidgetExt};
 use druid::text::{Attribute, RichText};
 use druid::Color;
+use druid::piet::TextStorage;
 
 /** Notes on Data and Lens.
    Il tratto Lens permette di accedere ad una porzione di una struttura dati
@@ -31,7 +34,7 @@ pub fn build_ui() -> impl Widget<AppState> {
     let layout = Flex::column()
         .with_child(header)
         .with_child(books_texts)
-        .with_child(books_list)
+        //.with_child(books_list)
         .fix_height(500.0);
     Padding::new(
         Insets::new(PADDING_LG, PADDING_LG, PADDING_LG, PADDING_LG),
@@ -85,11 +88,25 @@ fn book_item() -> impl Widget<Book> {
 
 fn book_text() -> impl Widget<Book> {
     //Creo un buffer con dentro il testo semplice (stringa)
-    let buf = ArcStr::from("Porco dio!");
+    let buf = ArcStr::from("RichText print!");
     //Creo RichText con attributi
     //Range dice da che posto devo partire ad applicare l'attributo a dove, con 0.. dovrebbe fare dall'inizio alla fine
     let rich = RichText::new(buf.clone()).with_attribute(0.., Attribute::text_color(Color::LIME));
-    //TODO: How to use rich in a Label ?
-    let text = Label::new(buf).with_text_color(Color::LIME); //Prova Colori
-    Flex::column().with_child(text)
+    //TODO: How to use rich in a Label?
+    //let text = Label::new(rich.as_str()).with_text_color(Color::RED); //Prova Colori
+
+    let doc = Scroll::new(ViewSwitcher::new(
+        |data: &Book, _env| data.get_doc().is_some(),
+        move |f, data, _env| {
+            if *f {
+                let prova = data.get_doc().unwrap();
+                Box::new(Label::new(data.get_string())) //Dentro data ho il Book
+            }
+            else {
+                Box::new(Label::new("Porca madonnaaa"))
+            }
+        }
+    ));
+
+    Flex::column().with_child(doc)
 }
