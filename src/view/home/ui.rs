@@ -12,6 +12,7 @@ use druid::text::{Attribute, RichText};
 use druid::Color;
 use druid::piet::TextStorage;
 use html_parser::Dom;
+use html2text::from_read;
 
 /** Notes on Data and Lens.
    Il tratto Lens permette di accedere ad una porzione di una struttura dati
@@ -32,7 +33,7 @@ pub fn build_ui() -> impl Widget<AppState> {
     let books_texts = Scroll::new(List::new(book_text))
         .vertical()
         .lens(AppState::library.then(Library::books));
-    let layout = Flex::column()
+    let layout = Flex::row()
         .with_child(header)
         .with_child(books_texts)
         //.with_child(books_list)
@@ -103,16 +104,24 @@ fn book_text() -> impl Widget<Book> {
                 let mut doc = data.get_doc().unwrap(); //Cosi prendo il clone fatto tramite Arc, lo unwrappo e ho il mutex
                 let mut doc_mut = doc.lock().unwrap(); //Prendo il mutex, lo blocco, e poi posso usarlo
                 let length = doc_mut.spine.len();
+                let mut vect = Vec::<String>::new();
 
                 for p in 0..length {
                     let mut page = doc_mut.get_current_str().unwrap();
-                    let page_str = page.as_str();
-                    let json = Dom::parse(page_str).unwrap().to_json().unwrap();
+                    //let page_str = page.as_str();
+                    //let json = Dom::parse(page_str).unwrap().to_json().unwrap();
                     //println!("{}", json);
+                    vect.push(from_read(page.as_bytes(), 100));
                     doc_mut.go_next();
                 }
 
-                Box::new(Label::new(data.get_string())) //Dentro data ho il Book
+                /*
+                let mut page = doc_mut.get_current_str().unwrap();
+                let page_str = page.as_str();
+                let json = Dom::parse(page_str).unwrap().to_json_pretty().unwrap();
+                 */
+
+                Box::new(Label::new(vect.concat())) //Dentro data ho il Book
             }
             else {
                 Box::new(Label::new("Porca madonnaaa"))
