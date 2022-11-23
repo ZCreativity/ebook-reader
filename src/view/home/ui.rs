@@ -11,6 +11,7 @@ use druid::{ArcStr, Insets, LensExt, TextLayout, Widget, WidgetExt};
 use druid::text::{Attribute, RichText};
 use druid::Color;
 use druid::piet::TextStorage;
+use html_parser::Dom;
 
 /** Notes on Data and Lens.
    Il tratto Lens permette di accedere ad una porzione di una struttura dati
@@ -99,7 +100,18 @@ fn book_text() -> impl Widget<Book> {
         |data: &Book, _env| data.get_doc().is_some(),
         move |f, data, _env| {
             if *f {
-                let prova = data.get_doc().unwrap();
+                let mut doc = data.get_doc().unwrap(); //Cosi prendo il clone fatto tramite Arc, lo unwrappo e ho il mutex
+                let mut doc_mut = doc.lock().unwrap(); //Prendo il mutex, lo blocco, e poi posso usarlo
+                let length = doc_mut.spine.len();
+
+                for p in 0..length {
+                    let mut page = doc_mut.get_current_str().unwrap();
+                    let page_str = page.as_str();
+                    let json = Dom::parse(page_str).unwrap().to_json().unwrap();
+                    //println!("{}", json);
+                    doc_mut.go_next();
+                }
+
                 Box::new(Label::new(data.get_string())) //Dentro data ho il Book
             }
             else {

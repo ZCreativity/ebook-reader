@@ -11,7 +11,7 @@ use crate::helper::functions::path_to_bytes;
 pub struct Book {
     title: String,
     cover: Option<Arc<ImageBuf>>,
-    doc: Option<Arc<EpubDoc<BufReader<File>>>>,
+    doc: Option<Arc<Mutex<EpubDoc<BufReader<File>>>>>,
 }
 
 impl Book {
@@ -33,7 +33,7 @@ impl Book {
 
         // Create book
         Self {
-            doc: Some(Arc::new(doc)),
+            doc: Some(Arc::new(Mutex::new(doc))),
             title,
             cover,
         }
@@ -46,7 +46,7 @@ impl Book {
         }
     }
 
-    pub fn get_doc(&self) -> Option<Arc<EpubDoc<BufReader<File>>>> {
+    pub fn get_doc(&self) -> Option<Arc<Mutex<EpubDoc<BufReader<File>>>>> {
         match &self.doc {
             Some(doc) => Some(doc.clone()),
             None => None,
