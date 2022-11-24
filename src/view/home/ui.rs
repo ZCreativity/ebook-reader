@@ -73,5 +73,19 @@ fn book_item() -> impl Widget<Book> {
             }
         },
     ));
-    Flex::column().with_child(title).with_child(cover)
+
+    let mut container = Flex::row();
+    let col_cover = Flex::column().with_child(cover);
+
+    let mut col_details = Flex::column();
+    col_details.add_child(title.fix_height(100_f64));
+
+    let author= Label::raw().lens(Book::title);
+    //col_details.add_child(author);
+
+
+    container.add_child(col_cover);
+    container.add_child(col_details);
+    
+    Scroll::new(container)
 }
