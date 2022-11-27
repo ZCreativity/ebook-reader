@@ -2,9 +2,9 @@ use crate::helper::config::{COVER_PLACEHOLDER, PADDING_LG, TITLE};
 use crate::model::book::Book;
 use crate::model::library::Library;
 use crate::{AppState, APP_NAME};
-use druid::widget::{Button, Flex, Label, List, MainAxisAlignment, Padding};
+use druid::widget::{Button, Flex, Label, List, MainAxisAlignment, Padding, Container};
 use druid::widget::{FillStrat, Image, Scroll, Svg, ViewSwitcher};
-use druid::{Insets, LensExt, Widget, WidgetExt};
+use druid::{Insets, LensExt, Widget, WidgetExt,Color};
 
 /** Notes on Data and Lens.
    Il tratto Lens permette di accedere ad una porzione di una struttura dati
@@ -73,19 +73,26 @@ fn book_item() -> impl Widget<Book> {
             }
         },
     ));
+    let author= Label::raw().lens(Book::title);
 
-    let mut container = Flex::row();
+    let mut book_layout = Flex::row();
     let col_cover = Flex::column().with_child(cover);
 
     let mut col_details = Flex::column();
-    col_details.add_child(title.fix_height(100_f64));
+    col_details.add_child(title);
+    col_details.add_spacer(10.0);
+    col_details.add_child(author);
+    col_details.add_spacer(50.0);
 
-    let author= Label::raw().lens(Book::title);
-    //col_details.add_child(author);
+    book_layout.add_child(col_cover);
+    book_layout.add_spacer(10.0);
+    book_layout.add_child(col_details);
 
+    let container = Container::new(book_layout)
+         .rounded(2.0)
+         .padding(2.0)
+         .border(Color::YELLOW, 2.0);
 
-    container.add_child(col_cover);
-    container.add_child(col_details);
     
-    Scroll::new(container)
+    return container;
 }
