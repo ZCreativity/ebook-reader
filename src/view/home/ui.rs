@@ -19,7 +19,6 @@ use std::collections::HashMap;
 use std::fs::metadata;
 use std::ops::Deref;
 use std::sync::Arc;
-use std::time::Instant;
 
 /** Notes on Data and Lens.
    Il tratto Lens permette di accedere ad una porzione di una struttura dati
@@ -98,18 +97,18 @@ fn book_text() -> impl Widget<Book> {
         |data: &Book, _env| data.get_doc().is_some(),
         move |f, data, _env| {
             if *f {
-                let mut doc = data.get_doc().unwrap(); //Cosi prendo il clone fatto tramite Arc, lo unwrappo e ho il mutex
+                let doc = data.get_doc().unwrap(); //Cosi prendo il clone fatto tramite Arc, lo unwrappo e ho il mutex
                 let mut doc_mut = doc.lock().unwrap(); //Prendo il mutex, lo blocco, e poi posso usarlo
                 let length = doc_mut.spine.len();
                 let mut vect = Vec::<Vec<TaggedLine<Vec<RichAnnotation>>>>::new();
 
                 for _ in 0..length {
-                    let mut page = doc_mut.get_current_str().unwrap();
+                    let page = doc_mut.get_current_str().unwrap();
                     vect.push(from_read_rich(page.as_bytes(), 100));
                     doc_mut.go_next();
                 }
 
-                let mut new_vector = vect.concat();
+                let new_vector = vect.concat();
                 let mut flex: Flex<Book> =
                     Flex::column().cross_axis_alignment(CrossAxisAlignment::Start);
 
@@ -179,7 +178,6 @@ fn book_text() -> impl Widget<Book> {
                                 Strikeout => (),
                                 Code => (),
                                 Preformat(_) => (),
-                                _ => (),
                             }
                         }
                     }
