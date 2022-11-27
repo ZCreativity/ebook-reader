@@ -130,19 +130,10 @@ fn book_text() -> impl Widget<Book> {
                         //RichAnnotation, after the loop we generate a Label with the overall text of the line
                         //and with the given attributes, like font_size, font_style etc...
                         for mut tagged_string in line.tagged_strings() {
-                            //TODO: add function that wraps the count from 1 to 6 (h1 to h6)
-                            //If we have a h1 or h2 or h3, handle it with tags
-                            if tagged_string.s == "# " {
-                                h = 1;
-                                flag = true;
-                            }
-                            if tagged_string.s == "## " {
-                                h = 2;
-                                flag = true;
-                            }
-                            if tagged_string.s == "### " {
-                                h = 3;
-                                flag = true;
+                            //If h has not been set yet, check if possible h label is being handled,
+                            //if a tag is already being handled (h > 0), just go ahead
+                            if h == 0 {
+                                (h, flag) = check_h(tagged_string.s.as_str());
                             }
 
                             //Each TaggedString can have multiple tags (uncommon), tag_vec makes a copy of the said vec
@@ -303,4 +294,16 @@ fn h_label_link(s: &str, h: i32) -> Label<Book> {
     Label::new(s)
         .with_text_color(Color::AQUA)
         .with_text_size(font_size)
+}
+
+fn check_h(s: &str) -> (i32, bool) {
+    match s {
+        "# " => (1, true),
+        "## " => (2, true),
+        "### " => (3, true),
+        "#### " => (4, true),
+        "##### " => (5, true),
+        "###### " => (6, true),
+        _ => (0, false)
+    }
 }
