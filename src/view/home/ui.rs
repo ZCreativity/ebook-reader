@@ -19,7 +19,7 @@ use druid::{Insets, LensExt, Widget, WidgetExt,Color};
 /* Home ui builder */
 pub fn build_ui() -> impl Widget<AppState> {
     let header = header();
-    let books_list = Scroll::new(List::new(book_item)).vertical()
+    let books_list = Scroll::new(List::new(book_item))
         .vertical()
         .lens(AppState::library.then(Library::books)); // Lens chaining
     let layout = Flex::column()
