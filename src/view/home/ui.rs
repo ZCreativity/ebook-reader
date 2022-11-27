@@ -304,6 +304,6 @@ fn check_h(s: &str) -> (i32, bool) {
         "#### " => (4, true),
         "##### " => (5, true),
         "###### " => (6, true),
-        _ => (0, false) //This is basically useless, just o have a, exhaustive match
+        _ => (0, false) //This is basically useless, just to have a, exhaustive match
     }
 }
