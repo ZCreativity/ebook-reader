@@ -19,7 +19,7 @@ use druid::{Insets, LensExt, Widget, WidgetExt,Color};
 /* Home ui builder */
 pub fn build_ui() -> impl Widget<AppState> {
     let header = header();
-    let books_list = Scroll::new(List::new(book_item))
+    let books_list = Scroll::new(List::new(book_item)).vertical()
         .vertical()
         .lens(AppState::library.then(Library::books)); // Lens chaining
     let layout = Flex::column()
@@ -48,10 +48,6 @@ fn header() -> impl Widget<AppState> {
 /* Book item */
 fn book_item() -> impl Widget<Book> {
     let title = Label::raw().lens(Book::title);
-    // let container = Container::new(Flex::column().with_child(title))
-    //     .rounded(PADDING_LG)
-    //     .padding(PADDING_LG)
-    //     .border(BORDER_LIGHT, 2.0);
 
     // // Clickable widget needs click controller and controller host
     // let click_controller = Click::new(|_ctx, data: &mut Book, _env| {
@@ -89,7 +85,7 @@ fn book_item() -> impl Widget<Book> {
     book_layout.add_child(col_details);
 
     let container = Container::new(book_layout)
-         .rounded(2.0)
+         .fix_size(300.0, 200.0)
          .padding(2.0)
          .border(Color::YELLOW, 2.0);
 
