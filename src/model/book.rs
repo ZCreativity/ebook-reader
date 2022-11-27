@@ -53,11 +53,6 @@ impl Book {
         }
     }
 
-    //TODO: delete, just a test
-    pub fn get_string(&self) -> &str {
-        "GetString"
-    }
-
     // pub fn get_title(&self) -> String {
     //     self.title.clone()
     // }

@@ -1,18 +1,25 @@
-use std::fs::metadata;
-use std::ops::Deref;
-use std::sync::Arc;
 use crate::helper::config::{COVER_PLACEHOLDER, PADDING_LG, TITLE};
 use crate::model::book::Book;
 use crate::model::library::Library;
 use crate::{AppState, APP_NAME};
-use druid::widget::{Button, Flex, Label, List, MainAxisAlignment, Padding, RawLabel};
-use druid::widget::{FillStrat, Image, Scroll, Svg, ViewSwitcher};
-use druid::{ArcStr, Insets, LensExt, TextLayout, Widget, WidgetExt};
-use druid::text::{Attribute, RichText};
-use druid::Color;
 use druid::piet::TextStorage;
-use html_parser::Dom;
-use html2text::from_read;
+use druid::widget::{Button, CrossAxisAlignment, Flex, Label, List, MainAxisAlignment, Padding};
+use druid::widget::{FillStrat, Image, Scroll, Svg, ViewSwitcher};
+use druid::FontStyle::Italic;
+use druid::TextAlignment::Center;
+use druid::{
+    ArcStr, FontDescriptor, FontFamily, FontWeight, Insets, LensExt, TextAlignment, TextLayout,
+    UnitPoint, Widget, WidgetExt,
+};
+use druid::{Color, FontStyle};
+use html2text::render::text_renderer::RichAnnotation::Emphasis;
+use html2text::render::text_renderer::{RichAnnotation, TaggedLine};
+use html2text::{from_read, from_read_rich};
+use std::collections::HashMap;
+use std::fs::metadata;
+use std::ops::Deref;
+use std::sync::Arc;
+use std::time::Instant;
 
 /** Notes on Data and Lens.
    Il tratto Lens permette di accedere ad una porzione di una struttura dati
@@ -33,11 +40,9 @@ pub fn build_ui() -> impl Widget<AppState> {
     let books_texts = Scroll::new(List::new(book_text))
         .vertical()
         .lens(AppState::library.then(Library::books));
-    let layout = Flex::row()
-        .with_child(header)
-        .with_child(books_texts)
-        //.with_child(books_list)
-        .fix_height(500.0);
+    let layout = Flex::row().with_child(header).with_child(books_texts);
+    //.with_child(books_list)
+    //.fix_height(500.0);
     Padding::new(
         Insets::new(PADDING_LG, PADDING_LG, PADDING_LG, PADDING_LG),
         layout,
@@ -89,14 +94,6 @@ fn book_item() -> impl Widget<Book> {
 }
 
 fn book_text() -> impl Widget<Book> {
-    //Creo un buffer con dentro il testo semplice (stringa)
-    let buf = ArcStr::from("RichText print!");
-    //Creo RichText con attributi
-    //Range dice da che posto devo partire ad applicare l'attributo a dove, con 0.. dovrebbe fare dall'inizio alla fine
-    let rich = RichText::new(buf.clone()).with_attribute(0.., Attribute::text_color(Color::LIME));
-    //TODO: How to use rich in a Label?
-    //let text = Label::new(rich.as_str()).with_text_color(Color::RED); //Prova Colori
-
     let doc = Scroll::new(ViewSwitcher::new(
         |data: &Book, _env| data.get_doc().is_some(),
         move |f, data, _env| {
@@ -104,30 +101,206 @@ fn book_text() -> impl Widget<Book> {
                 let mut doc = data.get_doc().unwrap(); //Cosi prendo il clone fatto tramite Arc, lo unwrappo e ho il mutex
                 let mut doc_mut = doc.lock().unwrap(); //Prendo il mutex, lo blocco, e poi posso usarlo
                 let length = doc_mut.spine.len();
-                let mut vect = Vec::<String>::new();
+                let mut vect = Vec::<Vec<TaggedLine<Vec<RichAnnotation>>>>::new();
 
-                for p in 0..length {
+                for _ in 0..length {
                     let mut page = doc_mut.get_current_str().unwrap();
-                    //let page_str = page.as_str();
-                    //let json = Dom::parse(page_str).unwrap().to_json().unwrap();
-                    //println!("{}", json);
-                    vect.push(from_read(page.as_bytes(), 100));
+                    vect.push(from_read_rich(page.as_bytes(), 100));
                     doc_mut.go_next();
                 }
 
-                /*
-                let mut page = doc_mut.get_current_str().unwrap();
-                let page_str = page.as_str();
-                let json = Dom::parse(page_str).unwrap().to_json_pretty().unwrap();
-                 */
+                let mut new_vector = vect.concat();
+                let mut flex: Flex<Book> =
+                    Flex::column().cross_axis_alignment(CrossAxisAlignment::Start);
 
-                Box::new(Label::new(vect.concat())) //Dentro data ho il Book
-            }
-            else {
+                for line in new_vector.iter() {
+                    let mut h: i32 = 0;
+                    let mut flag: bool = false;
+                    let mut line_str = String::from("");
+                    let mut tag_vect = Vec::<RichAnnotation>::new();
+
+                    //If TaggedLine is not empty but does not have TaggedStrings => skip = true
+                    //so that no useless lines are added
+                    let skip: bool = line.iter().peekable().peek().is_some()
+                        && line.tagged_strings().peekable().peek().is_none();
+
+                    if !skip {
+                        //Check elements in the vector of tagged string, each TaggedLine can contain multiple
+                        //TaggedString(s), this loop set the h flags, add text to the label and produce a vector of
+                        //RichAnnotation, after the loop we generate a Label with the overall text of the line
+                        //and with the given attributes, like font_size, font_style etc...
+                        for mut x in line.tagged_strings() {
+                            //TODO: add function that wraps the count from 1 to 6 (h1 to h6)
+                            //If we have a h1 or h2 or h3, handle it with tags
+                            if x.s == "# " {
+                                h = 1;
+                                flag = true;
+                            }
+                            if x.s == "## " {
+                                h = 2;
+                                flag = true;
+                            }
+                            if x.s == "### " {
+                                h = 3;
+                                flag = true;
+                            }
+
+                            //Each TaggedString can have multiple tags (uncommon), tag_vec makes a copy of the said vec
+                            let tags = x.clone().tag;
+
+                            //If not in a h specifier, add a label with given attributes, an h specifier with this library
+                            //is formatted as a TaggedString with no tag before the actual string that need styling
+                            if !flag {
+                                //Add the text to label
+                                line_str = [line_str, x.s.clone()].join("");
+
+                                //Else save all the flags in a vector
+                                for tag in tags.iter() {
+                                    tag_vect.push(tag.clone());
+                                }
+                            }
+
+                            flag = false;
+                        }
+
+                        use RichAnnotation::*;
+
+                        //If no tag are present, just append a simple Label with normal text
+                        if tag_vect.is_empty() {
+                            flex = no_tag(line_str.as_str(), flex, h);
+                        }
+
+                        //Else add Label with correct style
+                        //TODO: add missing case
+                        //TODO: if more than one tag, this doesn't work, it's gonna add multiple child (even if rare)
+                        //TODO: lines with h should be centered
+                        for tag in tag_vect.iter() {
+                            match tag {
+                                Default => {}
+                                Link(_) => {
+                                    flex = link(line_str.as_str(), flex, h);
+                                }
+                                Image => (),
+                                Emphasis => {
+                                    flex = emphasis(line_str.as_str(), flex, h);
+                                }
+                                Strong => (),
+                                Strikeout => (),
+                                Code => (),
+                                Preformat(_) => (),
+                                _ => (),
+                            }
+                        }
+                    }
+                }
+
+                Box::new(flex) //Dentro data ho il Book
+            } else {
                 Box::new(Label::new("Porca madonnaaa"))
             }
-        }
+        },
     ));
 
     Flex::column().with_child(doc)
+}
+
+fn no_tag(s: &str, mut flex: Flex<Book>, h: i32) -> Flex<Book> {
+    if h > 0 {
+        flex = flex.with_child(h_label(s, h));
+    } else {
+        flex = flex.with_child(default(s));
+    }
+
+    flex
+}
+
+fn emphasis(s: &str, mut flex: Flex<Book>, h: i32) -> Flex<Book> {
+    if h > 0 {
+        flex = flex.with_child(h_label_emphasis(s, h));
+    } else {
+        flex = flex.with_child(default(s));
+    }
+
+    flex
+}
+
+fn link(s: &str, mut flex: Flex<Book>, h: i32) -> Flex<Book> {
+    if h > 0 {
+        flex = flex.with_child(h_label_link(s, h));
+    } else {
+        flex = flex.with_child(default_with_color(s, Color::AQUA));
+    }
+
+    flex
+    //TODO: underline string
+}
+
+fn default(s: &str) -> impl Widget<Book> {
+    Label::new(s)
+}
+
+fn default_with_color(s: &str, color: Color) -> impl Widget<Book> {
+    Label::new(s).with_text_color(color)
+}
+
+fn h_label(s: &str, h: i32) -> Label<Book> {
+    // From Google
+    // h1 | 2em    | 32px
+    // h2 | 1.5em  | 24px
+    // h3 | 1.17em | 18.72px
+    // h4 | 1em    | 16px
+    // h5 | 0.83em | 13.28px
+    // h6 | 0.67em | 10.72px
+
+    //TODO: add to config, problem with call
+    let h_sizes: HashMap<i32, f64> = HashMap::from([
+        (1, 32_f64),
+        (2, 24_f64),
+        (3, 18.72_f64),
+        (4, 16_f64),
+        (5, 13.28_f64),
+        (6, 10.72_f64),
+    ]);
+
+    let font_size = *h_sizes.get(&h).unwrap();
+    Label::new(s).with_font(
+        FontDescriptor::new(FontFamily::SYSTEM_UI)
+            .with_size(font_size)
+            .with_weight(FontWeight::BOLD),
+    )
+}
+
+fn h_label_emphasis(s: &str, h: i32) -> Label<Book> {
+    let h_sizes: HashMap<i32, f64> = HashMap::from([
+        (1, 32_f64),
+        (2, 24_f64),
+        (3, 18.72_f64),
+        (4, 16_f64),
+        (5, 13.28_f64),
+        (6, 10.72_f64),
+    ]);
+
+    let font_size = *h_sizes.get(&h).unwrap();
+    Label::new(s).with_font(
+        FontDescriptor::new(FontFamily::SYSTEM_UI)
+            .with_size(font_size)
+            .with_weight(FontWeight::BOLD)
+            .with_style(FontStyle::Italic),
+    )
+}
+
+fn h_label_link(s: &str, h: i32) -> Label<Book> {
+    let h_sizes: HashMap<i32, f64> = HashMap::from([
+        (1, 32_f64),
+        (2, 24_f64),
+        (3, 18.72_f64),
+        (4, 16_f64),
+        (5, 13.28_f64),
+        (6, 10.72_f64),
+    ]);
+
+    let font_size = *h_sizes.get(&h).unwrap();
+    Label::new(s)
+        .with_text_color(Color::AQUA)
+        .with_text_size(font_size)
 }
