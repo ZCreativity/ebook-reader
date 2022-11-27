@@ -196,7 +196,7 @@ fn book_text() -> impl Widget<Book> {
 
                 Box::new(flex) //Dentro data ho il Book
             } else {
-                Box::new(Label::new("Porca madonnaaa"))
+                Box::new(Flex::column())
             }
         },
     ));
