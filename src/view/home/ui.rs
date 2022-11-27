@@ -5,20 +5,19 @@ use crate::{AppState, APP_NAME};
 use druid::piet::TextStorage;
 use druid::widget::{Button, CrossAxisAlignment, Flex, Label, List, MainAxisAlignment, Padding};
 use druid::widget::{FillStrat, Image, Scroll, Svg, ViewSwitcher};
-use druid::FontStyle::Italic;
-use druid::TextAlignment::Center;
+
+
 use druid::{
-    ArcStr, FontDescriptor, FontFamily, FontWeight, Insets, LensExt, TextAlignment, TextLayout,
-    UnitPoint, Widget, WidgetExt,
+    FontDescriptor, FontFamily, FontWeight, Insets, LensExt, Widget, WidgetExt,
 };
 use druid::{Color, FontStyle};
-use html2text::render::text_renderer::RichAnnotation::Emphasis;
+
 use html2text::render::text_renderer::{RichAnnotation, TaggedLine};
-use html2text::{from_read, from_read_rich};
+use html2text::{from_read_rich};
 use std::collections::HashMap;
-use std::fs::metadata;
-use std::ops::Deref;
-use std::sync::Arc;
+
+
+
 
 /** Notes on Data and Lens.
    Il tratto Lens permette di accedere ad una porzione di una struttura dati
@@ -33,7 +32,7 @@ use std::sync::Arc;
 /* Home ui builder */
 pub fn build_ui() -> impl Widget<AppState> {
     let header = header();
-    let books_list = Scroll::new(List::new(book_item))
+    let _books_list = Scroll::new(List::new(book_item))
         .vertical()
         .lens(AppState::library.then(Library::books)); // Lens chaining
     let books_texts = Scroll::new(List::new(book_text))
@@ -128,7 +127,7 @@ fn book_text() -> impl Widget<Book> {
                         //TaggedString(s), this loop set the h flags, add text to the label and produce a vector of
                         //RichAnnotation, after the loop we generate a Label with the overall text of the line
                         //and with the given attributes, like font_size, font_style etc...
-                        for mut tagged_string in line.tagged_strings() {
+                        for tagged_string in line.tagged_strings() {
                             //If h has not been set yet, check if possible h label is being handled,
                             //if a tag is already being handled (h > 0), just go ahead
                             if h == 0 {

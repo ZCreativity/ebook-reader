@@ -40,17 +40,11 @@ impl Book {
     }
 
     pub fn get_image_buf(&self) -> Option<Arc<ImageBuf>> {
-        match &self.cover {
-            Some(cover) => Some(cover.clone()),
-            None => None,
-        }
+        self.cover.as_ref().cloned()
     }
 
     pub fn get_doc(&self) -> Option<Arc<Mutex<EpubDoc<BufReader<File>>>>> {
-        match &self.doc {
-            Some(doc) => Some(doc.clone()),
-            None => None,
-        }
+        self.doc.as_ref().cloned()
     }
 
     // pub fn get_title(&self) -> String {

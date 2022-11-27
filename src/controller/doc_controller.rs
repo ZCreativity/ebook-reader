@@ -27,7 +27,7 @@ impl DocController {
         let cover_data = doc.get_cover().unwrap();
         let mut cover_path = String::from(COVERS_PATH);
         cover_path
-            .push_str(format!("{}.png", doc.mdata("title").unwrap().replace(" ", "-")).as_str());
+            .push_str(format!("{}.png", doc.mdata("title").unwrap().replace(' ', "-")).as_str());
         let path = Path::new(cover_path.as_str());
         println!("Path: {:?}", path);
         let f = fs::File::create(path);
