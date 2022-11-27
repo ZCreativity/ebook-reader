@@ -129,30 +129,30 @@ fn book_text() -> impl Widget<Book> {
                         //TaggedString(s), this loop set the h flags, add text to the label and produce a vector of
                         //RichAnnotation, after the loop we generate a Label with the overall text of the line
                         //and with the given attributes, like font_size, font_style etc...
-                        for mut x in line.tagged_strings() {
+                        for mut tagged_string in line.tagged_strings() {
                             //TODO: add function that wraps the count from 1 to 6 (h1 to h6)
                             //If we have a h1 or h2 or h3, handle it with tags
-                            if x.s == "# " {
+                            if tagged_string.s == "# " {
                                 h = 1;
                                 flag = true;
                             }
-                            if x.s == "## " {
+                            if tagged_string.s == "## " {
                                 h = 2;
                                 flag = true;
                             }
-                            if x.s == "### " {
+                            if tagged_string.s == "### " {
                                 h = 3;
                                 flag = true;
                             }
 
                             //Each TaggedString can have multiple tags (uncommon), tag_vec makes a copy of the said vec
-                            let tags = x.clone().tag;
+                            let tags = tagged_string.clone().tag;
 
                             //If not in a h specifier, add a label with given attributes, an h specifier with this library
                             //is formatted as a TaggedString with no tag before the actual string that need styling
                             if !flag {
                                 //Add the text to label
-                                line_str = [line_str, x.s.clone()].join("");
+                                line_str = [line_str, tagged_string.s.clone()].join("");
 
                                 //Else save all the flags in a vector
                                 for tag in tags.iter() {
