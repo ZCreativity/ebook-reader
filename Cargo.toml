@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
 native-dialog = "0.6.3"
-epub = "1.2.3"
+epub = "1.2.4"
 html2text = "0.4.4"
 
 [dependencies.druid]

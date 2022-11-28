@@ -7,9 +7,7 @@ use druid::widget::{Button, CrossAxisAlignment, Flex, Label, List, MainAxisAlign
 use druid::widget::{FillStrat, Image, Scroll, Svg, ViewSwitcher};
 
 
-use druid::{
-    FontDescriptor, FontFamily, FontWeight, Insets, LensExt, Widget, WidgetExt,
-};
+use druid::{FontDescriptor, FontFamily, FontWeight, Insets, LensExt, Vec2, Widget, WidgetExt};
 use druid::{Color, FontStyle};
 
 use html2text::render::text_renderer::{RichAnnotation, TaggedLine};
@@ -101,6 +99,8 @@ fn book_text() -> impl Widget<Book> {
                 let length = doc_mut.spine.len();
                 let mut vect = Vec::<Vec<TaggedLine<Vec<RichAnnotation>>>>::new();
 
+                println!("{:?}", doc_mut.resources);
+
                 for _ in 0..length {
                     let page = doc_mut.get_current_str().unwrap();
                     vect.push(from_read_rich(page.as_bytes(), 100));
@@ -139,6 +139,7 @@ fn book_text() -> impl Widget<Book> {
 
                             //If not in a h specifier, add a label with given attributes, an h specifier with this library
                             //is formatted as a TaggedString with no tag before the actual string that need styling
+                            //just checking h > 0 is not exhaustive, as we can have just normal string where h is 0
                             if !flag {
                                 //Add the text to label
                                 line_str = [line_str, tagged_string.s.clone()].join("");
@@ -166,8 +167,10 @@ fn book_text() -> impl Widget<Book> {
                         for tag in tag_vect.iter() {
                             match tag {
                                 Default => {}
-                                Link(_) => {
+                                Link(link_str) => {
                                     flex = link(line_str.as_str(), flex, h);
+                                    // Print the link as test
+                                    println!("{}", link_str);
                                 }
                                 Image => (),
                                 Emphasis => {
@@ -232,65 +235,26 @@ fn default_with_color(s: &str, color: Color) -> impl Widget<Book> {
 }
 
 fn h_label(s: &str, h: i32) -> Label<Book> {
-    // From Google
-    // h1 | 2em    | 32px
-    // h2 | 1.5em  | 24px
-    // h3 | 1.17em | 18.72px
-    // h4 | 1em    | 16px
-    // h5 | 0.83em | 13.28px
-    // h6 | 0.67em | 10.72px
-
-    //TODO: add to config, problem with call
-    let h_sizes: HashMap<i32, f64> = HashMap::from([
-        (1, 32_f64),
-        (2, 24_f64),
-        (3, 18.72_f64),
-        (4, 16_f64),
-        (5, 13.28_f64),
-        (6, 10.72_f64),
-    ]);
-
-    let font_size = *h_sizes.get(&h).unwrap();
     Label::new(s).with_font(
         FontDescriptor::new(FontFamily::SYSTEM_UI)
-            .with_size(font_size)
+            .with_size(h_font_size(h))
             .with_weight(FontWeight::BOLD),
     )
 }
 
 fn h_label_emphasis(s: &str, h: i32) -> Label<Book> {
-    let h_sizes: HashMap<i32, f64> = HashMap::from([
-        (1, 32_f64),
-        (2, 24_f64),
-        (3, 18.72_f64),
-        (4, 16_f64),
-        (5, 13.28_f64),
-        (6, 10.72_f64),
-    ]);
-
-    let font_size = *h_sizes.get(&h).unwrap();
     Label::new(s).with_font(
         FontDescriptor::new(FontFamily::SYSTEM_UI)
-            .with_size(font_size)
+            .with_size(h_font_size(h))
             .with_weight(FontWeight::BOLD)
             .with_style(FontStyle::Italic),
     )
 }
 
 fn h_label_link(s: &str, h: i32) -> Label<Book> {
-    let h_sizes: HashMap<i32, f64> = HashMap::from([
-        (1, 32_f64),
-        (2, 24_f64),
-        (3, 18.72_f64),
-        (4, 16_f64),
-        (5, 13.28_f64),
-        (6, 10.72_f64),
-    ]);
-
-    let font_size = *h_sizes.get(&h).unwrap();
     Label::new(s)
         .with_text_color(Color::AQUA)
-        .with_text_size(font_size)
+        .with_text_size(h_font_size(h))
 }
 
 fn check_h(s: &str) -> (i32, bool) {
@@ -303,4 +267,25 @@ fn check_h(s: &str) -> (i32, bool) {
         "###### " => (6, true),
         _ => (0, false) //This is basically useless, just to have a, exhaustive match
     }
+}
+
+fn h_font_size(h: i32) -> f64 {
+    // From Google
+    // h1 | 2em    | 32px
+    // h2 | 1.5em  | 24px
+    // h3 | 1.17em | 18.72px
+    // h4 | 1em    | 16px
+    // h5 | 0.83em | 13.28px
+    // h6 | 0.67em | 10.72px
+
+    let h_sizes: HashMap<i32, f64> = HashMap::from([
+        (1, 32_f64),
+        (2, 24_f64),
+        (3, 18.72_f64),
+        (4, 16_f64),
+        (5, 13.28_f64),
+        (6, 10.72_f64),
+    ]);
+
+    *h_sizes.get(&h).unwrap()
 }
