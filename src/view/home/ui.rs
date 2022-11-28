@@ -3,7 +3,7 @@ use crate::model::book::Book;
 use crate::model::library::Library;
 use crate::{AppState, APP_NAME};
 use druid::piet::TextStorage;
-use druid::widget::{Button, CrossAxisAlignment, Flex, Label, List, MainAxisAlignment, Padding};
+use druid::widget::{Button, CrossAxisAlignment, Flex, Label, LensWrap, List, MainAxisAlignment, Padding};
 use druid::widget::{FillStrat, Image, Scroll, Svg, ViewSwitcher};
 
 
@@ -29,14 +29,20 @@ use std::collections::HashMap;
 
 /* Home ui builder */
 pub fn build_ui() -> impl Widget<AppState> {
+    let mut scroll_value = Vec2::new(0.5, 100_f64);
     let header = header();
     let _books_list = Scroll::new(List::new(book_item))
         .vertical()
         .lens(AppState::library.then(Library::books)); // Lens chaining
-    let books_texts = Scroll::new(List::new(book_text))
-        .vertical()
-        .lens(AppState::library.then(Library::books));
-    let layout = Flex::row().with_child(header).with_child(books_texts);
+    let mut books_texts = Scroll::new(List::new(book_text))
+        .vertical();
+        //.lens(AppState::library.then(Library::books));
+    let boolean = books_texts.scroll_by(scroll_value);
+    println!("Changed? {}", boolean); //TODO: scroll
+    println!("{}", books_texts.offset());
+    let books_texts_lens = books_texts.lens(AppState::library.then(Library::books));
+
+    let layout = Flex::row().with_child(header).with_child(books_texts_lens);
     //.with_child(books_list)
     //.fix_height(500.0);
     Padding::new(
