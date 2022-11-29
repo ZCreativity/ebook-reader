@@ -1,4 +1,4 @@
-use crate::helper::config::{COVER_PLACEHOLDER, PADDING_LG, TITLE, AUTHOR};
+use crate::helper::config::{COVER_PLACEHOLDER, PADDING_LG, TITLE, AUTHOR, ALERT};
 use crate::model::book::Book;
 use crate::model::library::Library;
 use crate::{AppState, APP_NAME};
@@ -20,14 +20,6 @@ use druid::{Insets, LensExt, Widget, WidgetExt,Color, TextAlignment, lens};
 pub fn build_ui() -> impl Widget<AppState> {
     let header = header();
 
-    /*let books_list = Flex::row().with_child(List::new(book_item).horizontal())
-        .lens(AppState::library.then(Library::books)); */
-    
-    /*let container = Container::new(books_list)
-        .fix_size(936.0, 600.0)
-        .padding(2.0)
-        .border(Color::RED, 2.0);*/
-
     let container = books_container().lens(AppState::library);
 
     let layout = Flex::column()
@@ -45,13 +37,17 @@ pub fn build_ui() -> impl Widget<AppState> {
 /* Header section */
 fn header() -> impl Widget<AppState> {
     let header_label = Label::new(APP_NAME).with_font(TITLE);
+
     let add_book_button =
         Button::new("Add book").on_click(|_, data: &mut AppState, _| data.add_book());
+
     let mut header = Flex::row()
         .with_child(header_label)
         .main_axis_alignment(MainAxisAlignment::SpaceBetween)
         .must_fill_main_axis(true);
+
     header.add_child(add_book_button);
+
     header
 }
 
@@ -86,10 +82,11 @@ fn books_container() -> impl Widget<Library> {
                     col = col.with_child(row);
                 }
 
-                Box::new(Scroll::new(col) )
+                Box::new(Scroll::new(col))
 
             } else {
-                Box::new(Svg::new(COVER_PLACEHOLDER.parse().unwrap()).fill_mode(FillStrat::Fill))
+                let label = Label::new("There are no books in the library!").with_font(ALERT).padding(Insets::new(0.0, 200.0, 0.0, 0.0));
+                Box::new(label)
             }
         },
     ));
