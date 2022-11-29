@@ -2,7 +2,7 @@ use crate::helper::config::{COVER_PLACEHOLDER, PADDING_LG, TITLE, AUTHOR};
 use crate::model::book::Book;
 use crate::model::library::Library;
 use crate::{AppState, APP_NAME};
-use druid::widget::{Button, Flex, Label, List, MainAxisAlignment, Padding, Container};
+use druid::widget::{Button, Flex, Label, List, MainAxisAlignment, Padding, Container, CrossAxisAlignment, Click, ControllerHost};
 use druid::widget::{FillStrat, Image, Scroll, Svg, ViewSwitcher};
 use druid::{Insets, LensExt, Widget, WidgetExt,Color, TextAlignment, lens};
 
@@ -34,7 +34,8 @@ pub fn build_ui() -> impl Widget<AppState> {
         .with_child(header)
         .with_child(container)
         .fix_height(500.0);
-    
+
+
     Padding::new(
         Insets::new(PADDING_LG, PADDING_LG, PADDING_LG, PADDING_LG),
         layout,
@@ -65,7 +66,7 @@ fn books_container() -> impl Widget<Library> {
                 let cols = 3;
                 let rows = (data.get_length() / 3_f64).ceil() as i32;
                 
-                let mut col = Flex::column();
+                let mut col = Flex::column().cross_axis_alignment(CrossAxisAlignment::Start);
                 let books = data.get_books_vec();
                 let mut component_vector = Vec::new(); //Vettore di componenti fatti con la funzione di giu
 
@@ -85,15 +86,14 @@ fn books_container() -> impl Widget<Library> {
                     col = col.with_child(row);
                 }
 
-                Box::new(col)
+                Box::new(Scroll::new(col).vertical() )
 
             } else {
                 Box::new(Svg::new(COVER_PLACEHOLDER.parse().unwrap()).fill_mode(FillStrat::Fill))
             }
         },
     ))
-        .fix_size(936.0, 600.0)
-        .padding(2.0)
+        .fix_size(1050.0, 600.0)
         .border(Color::RED, 2.0);
     
      
@@ -107,12 +107,11 @@ fn book_component(book: Book) -> impl Widget<Library> {
 
     let title = Label::new(book.get_title().as_str());
     let author = Label::new(book.get_author().as_str());
-    let cover = book.get_image_buf().unwrap();
     
     let mut book_layout = Flex::row();
     let col_cover = Image::new(book.get_image_buf().as_ref().unwrap().as_ref().clone()).fix_size(100.0, 200.0);
 
-    let mut col_details = Flex::column();
+    let mut col_details = Flex::column().cross_axis_alignment(CrossAxisAlignment::Start);
     col_details.add_child(title);
     col_details.add_spacer(10.0);
     col_details.add_child(author);
@@ -123,12 +122,14 @@ fn book_component(book: Book) -> impl Widget<Library> {
     book_layout.add_child(col_details);
 
     let container = Container::new(book_layout)
-         .fix_size(296.0, 200.0)
+         .fix_size(350.0, 200.0)
          .padding(2.0)
-         .border(Color::YELLOW, 2.0);
+        .border(Color::YELLOW, 2_f64);
 
-    
-    return container;
+    let controller_host = ControllerHost::new(container,
+                                              Click::new(|_, _, _| println!("Click")));
+
+    return controller_host;
 }
 
 /* Book item */
