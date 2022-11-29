@@ -59,7 +59,7 @@ fn books_container() -> impl Widget<Library> {
     // let books_list = Flex::row().with_child(List::new(book_item).horizontal())
     //    .lens(AppState::library.then(Library::books));
 
-    let container = Container::new(ViewSwitcher::new(
+    let container = Flex::row().with_child(ViewSwitcher::new(
         |data: &Library, _env| (data.get_length() > 0_f64), //Se ho libri in libreria
         move |f, data, _env| {
             if *f  {
@@ -86,17 +86,13 @@ fn books_container() -> impl Widget<Library> {
                     col = col.with_child(row);
                 }
 
-                Box::new(Scroll::new(col).vertical() )
+                Box::new(Scroll::new(col) )
 
             } else {
                 Box::new(Svg::new(COVER_PLACEHOLDER.parse().unwrap()).fill_mode(FillStrat::Fill))
             }
         },
-    ))
-        .fix_size(1050.0, 600.0)
-        .border(Color::RED, 2.0);
-    
-     
+    ));
 
     return container;
     
@@ -121,10 +117,10 @@ fn book_component(book: Book) -> impl Widget<Library> {
     book_layout.add_spacer(10.0);
     book_layout.add_child(col_details);
 
-    let container = Container::new(book_layout)
-         .fix_size(350.0, 200.0)
+    let container = Flex::column().with_child(book_layout)
+         .fix_size(340.0, 200.0)
          .padding(2.0)
-        .border(Color::YELLOW, 2_f64);
+        .border(Color::GRAY, 2_f64);
 
     let controller_host = ControllerHost::new(container,
                                               Click::new(|_, _, _| println!("Click")));
