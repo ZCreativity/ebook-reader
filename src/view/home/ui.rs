@@ -2,20 +2,15 @@ use crate::helper::config::{COVER_PLACEHOLDER, PADDING_LG, TITLE};
 use crate::model::book::Book;
 use crate::model::library::Library;
 use crate::{AppState, APP_NAME};
-use druid::piet::TextStorage;
-use druid::widget::{Button, CrossAxisAlignment, Flex, Label, LensWrap, List, MainAxisAlignment, Padding};
+use druid::widget::{Button, CrossAxisAlignment, Flex, Label, List, MainAxisAlignment, Padding};
 use druid::widget::{FillStrat, Image, Scroll, Svg, ViewSwitcher};
 
-
-use druid::{FontDescriptor, FontFamily, FontWeight, Insets, LensExt, Vec2, Widget, WidgetExt};
 use druid::{Color, FontStyle};
+use druid::{FontDescriptor, FontFamily, FontWeight, Insets, LensExt, Widget, WidgetExt};
 
+use html2text::from_read_rich;
 use html2text::render::text_renderer::{RichAnnotation, TaggedLine};
-use html2text::{from_read_rich};
 use std::collections::HashMap;
-
-
-
 
 /** Notes on Data and Lens.
    Il tratto Lens permette di accedere ad una porzione di una struttura dati
@@ -29,22 +24,14 @@ use std::collections::HashMap;
 
 /* Home ui builder */
 pub fn build_ui() -> impl Widget<AppState> {
-    let mut scroll_value = Vec2::new(0.5, 100_f64);
     let header = header();
     let _books_list = Scroll::new(List::new(book_item))
         .vertical()
         .lens(AppState::library.then(Library::books)); // Lens chaining
-    let mut books_texts = Scroll::new(List::new(book_text))
-        .vertical();
-        //.lens(AppState::library.then(Library::books));
-    let boolean = books_texts.scroll_by(scroll_value);
-    println!("Changed? {}", boolean); //TODO: scroll
-    println!("{}", books_texts.offset());
+    let books_texts = Scroll::new(List::new(book_text)).vertical();
+    //.lens(AppState::library.then(Library::books));
     let books_texts_lens = books_texts.lens(AppState::library.then(Library::books));
-
     let layout = Flex::row().with_child(header).with_child(books_texts_lens);
-    //.with_child(books_list)
-    //.fix_height(500.0);
     Padding::new(
         Insets::new(PADDING_LG, PADDING_LG, PADDING_LG, PADDING_LG),
         layout,
@@ -110,7 +97,10 @@ fn book_text() -> impl Widget<Book> {
                 for _ in 0..length {
                     let page = doc_mut.get_current_str().unwrap();
                     vect.push(from_read_rich(page.as_bytes(), 100));
-                    doc_mut.go_next();
+                    match doc_mut.go_next() {
+                        Ok(_) => (),
+                        Err(err) => println!("Error: {}", err),
+                    }
                 }
 
                 let new_vector = vect.concat();
@@ -271,7 +261,7 @@ fn check_h(s: &str) -> (i32, bool) {
         "#### " => (4, true),
         "##### " => (5, true),
         "###### " => (6, true),
-        _ => (0, false) //This is basically useless, just to have a, exhaustive match
+        _ => (0, false), //This is basically useless, just to have a, exhaustive match
     }
 }
 

@@ -65,13 +65,7 @@ impl Library {
         };
 
         let book = DocController::epub_to_book(path.clone());
-        let filename = path
-            
-            .file_name()
-            .unwrap()
-            .to_str()
-            .unwrap()
-            .to_string();
+        let filename = path.file_name().unwrap().to_str().unwrap().to_string();
         let to = format!("{}/{}", LIBRARY_PATH, filename);
         let result = fs::copy(path, to);
         match result {
