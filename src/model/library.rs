@@ -1,19 +1,18 @@
+use crate::controller::doc_controller::DocController;
 use crate::helper::config::LIBRARY_PATH;
 use crate::helper::functions::open_native_dialog;
+use crate::model::book::Book;
+use druid::im::Vector;
 use druid::{Data, Lens};
 use std::fs;
 use std::fs::ReadDir;
-use druid::im::Vector;
-use crate::model::book::Book;
-use crate::controller::doc_controller::DocController;
 
 #[derive(Data, Lens, Clone)]
 pub struct Library {
-    books: Vector<Book>,  // Using druid "im" crate for immutable data structures, which can me modified and copied efficiently
+    books: Vector<Book>, // Using druid "im" crate for immutable data structures, which can me modified and copied efficiently
 }
 
 impl Library {
-
     /** Initialize library
      */
     pub fn new() -> Self {
@@ -34,8 +33,12 @@ impl Library {
             for file in dir.unwrap() {
                 let book = DocController::epub_to_book(file.as_ref().unwrap().path());
                 match book {
-                    None => { eprintln!("Unable to add book {}", file.unwrap().path().display()); }
-                    Some(book) => { book_list.push_back(book); }
+                    None => {
+                        eprintln!("Unable to add book {}", file.unwrap().path().display());
+                    }
+                    Some(book) => {
+                        book_list.push_back(book);
+                    }
                 }
             }
 
@@ -43,7 +46,9 @@ impl Library {
         }
 
         // No files found
-        Self { books: Vector::new() }
+        Self {
+            books: Vector::new(),
+        }
     }
 
     /**
@@ -60,13 +65,21 @@ impl Library {
         };
 
         let book = DocController::epub_to_book(path.clone());
-        let filename = path.clone().file_name().unwrap().to_str().unwrap().to_string();
+        let filename = path
+            
+            .file_name()
+            .unwrap()
+            .to_str()
+            .unwrap()
+            .to_string();
         let to = format!("{}/{}", LIBRARY_PATH, filename);
-        let result = fs::copy(path.clone(), to);
+        let result = fs::copy(path, to);
         match result {
             Ok(_) => {
                 match book {
-                    None => { eprintln!("Unable to generate ebook for this file")}
+                    None => {
+                        eprintln!("Unable to generate ebook for this file")
+                    }
                     Some(book) => {
                         self.books.push_back(book);
                     }
