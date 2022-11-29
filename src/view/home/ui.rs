@@ -29,7 +29,7 @@ use std::collections::HashMap;
 
 /* Home ui builder */
 pub fn build_ui() -> impl Widget<AppState> {
-    let mut scroll_value = Vec2::new(0.5, 100_f64);
+    let mut scroll_value = Vec2::new(100_f64, 100_f64);
     let header = header();
     let _books_list = Scroll::new(List::new(book_item))
         .vertical()
@@ -110,6 +110,7 @@ fn book_text() -> impl Widget<Book> {
                 for _ in 0..length {
                     let page = doc_mut.get_current_str().unwrap();
                     vect.push(from_read_rich(page.as_bytes(), 100));
+                    println!("{:?}", doc_mut.get_current_id().unwrap());
                     doc_mut.go_next();
                 }
 
