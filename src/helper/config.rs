@@ -1,10 +1,11 @@
-use druid::{FontDescriptor, FontFamily, FontWeight};
+use druid::{FontDescriptor, FontFamily, FontWeight,FontStyle};
 
 /* UI */
 pub const DISPLAY_WIDTH: f64 = 1000.0;
 pub const DISPLAY_HEIGHT: f64 = 800.0;
 pub const APP_NAME: &str = "EBook Reader";
 pub const TITLE_SIZE: f64 = 24.0;
+pub const AUTHOR_SIZE: f64 = 14.0;
 // pub const PADDING_SM: f64 = 8.0;
 // pub const PADDING_MD: f64 = 16.0;
 pub const PADDING_LG: f64 = 32.0;
@@ -14,6 +15,10 @@ pub const PADDING_LG: f64 = 32.0;
 pub const TITLE: FontDescriptor = FontDescriptor::new(FontFamily::SERIF)
     .with_size(TITLE_SIZE)
     .with_weight(FontWeight::BOLD);
+
+pub const AUTHOR: FontDescriptor = FontDescriptor::new(FontFamily::SERIF)
+    .with_size(AUTHOR_SIZE)
+    .with_style(FontStyle::Italic);
 
 /* Data */
 pub const LIBRARY_PATH: &str = "./src/library";

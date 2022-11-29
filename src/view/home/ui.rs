@@ -1,10 +1,10 @@
-use crate::helper::config::{COVER_PLACEHOLDER, PADDING_LG, TITLE};
+use crate::helper::config::{COVER_PLACEHOLDER, PADDING_LG, TITLE, AUTHOR};
 use crate::model::book::Book;
 use crate::model::library::Library;
 use crate::{AppState, APP_NAME};
 use druid::widget::{Button, Flex, Label, List, MainAxisAlignment, Padding, Container};
 use druid::widget::{FillStrat, Image, Scroll, Svg, ViewSwitcher};
-use druid::{Insets, LensExt, Widget, WidgetExt,Color};
+use druid::{Insets, LensExt, Widget, WidgetExt,Color, TextAlignment};
 
 /** Notes on Data and Lens.
    Il tratto Lens permette di accedere ad una porzione di una struttura dati
@@ -69,7 +69,8 @@ fn book_item() -> impl Widget<Book> {
             }
         },
     ));
-    let author= Label::raw().lens(Book::title);
+    let author= Label::raw().with_font(AUTHOR).lens(Book::author);
+
 
     let mut book_layout = Flex::row();
     let col_cover = Flex::column().with_child(cover);
