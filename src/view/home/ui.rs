@@ -1,20 +1,14 @@
-use crate::helper::config::{COVER_PLACEHOLDER, DISPLAY_HEIGHT, DISPLAY_WIDTH, PADDING_LG, TITLE};
+use crate::helper::config::{COVER_PLACEHOLDER, PADDING_LG, TITLE};
 use crate::model::book::Book;
 use crate::model::library::Library;
+use crate::view::book::ui::build_ui_book;
 use crate::{AppState, APP_NAME};
-use druid::theme::BORDER_LIGHT;
 use druid::widget::{
-    Button, Click, Container, ControllerHost, CrossAxisAlignment, Flex, Label, List,
-    MainAxisAlignment, Padding,
+    Button, Click, Controller, ControllerHost, Either, Flex, Label, List, MainAxisAlignment,
+    Padding,
 };
 use druid::widget::{FillStrat, Image, Scroll, Svg, ViewSwitcher};
-
-use druid::{Color, EventCtx, FontStyle, WindowDesc};
-use druid::{FontDescriptor, FontFamily, FontWeight, Insets, LensExt, Widget, WidgetExt};
-
-use html2text::from_read_rich;
-use html2text::render::text_renderer::{RichAnnotation, TaggedLine};
-use std::collections::HashMap;
+use druid::{EventCtx, Insets, LensExt, Widget, WidgetExt};
 
 /** Notes on Data and Lens.
    Il tratto Lens permette di accedere ad una porzione di una struttura dati
@@ -28,37 +22,63 @@ use std::collections::HashMap;
 
 /* Home ui builder */
 pub fn build_ui() -> impl Widget<AppState> {
-    let mut scroll_value = Vec2::new(100_f64, 100_f64);
+    // View switcher for book view and library view
+    let either = Either::new(
+        |data: &AppState, _env| data.get_opened_book().is_some(),
+        build_ui_book(),
+        library_view().controller(controller),
+    );
+
+    Padding::new(
+        Insets::new(PADDING_LG, PADDING_LG, PADDING_LG, PADDING_LG),
+        either,
+    )
+}
+
+/* Library View */
+fn library_view() -> impl Widget<AppState> {
     let header = header();
-    let _books_list = Scroll::new(List::new(book_item))
+    let book_list = Scroll::new(List::new(book_item))
         .vertical()
         .lens(AppState::library.then(Library::books)); // Lens chaining
 
-    // View switcher for book view and library view
-    let view_switcher = ViewSwitcher::new(
-        |data: &AppState, _env| data.get_opened_book().is_some(),
-        |condition: &bool, data: &AppState, _env| {
-            if *condition {
-                // Book view
-                let book = data.get_opened_book().unwrap();
-                let book_view = Scroll::new(List::new(book_text))
-                    .vertical()
-                    .lens(data.get_opened_book());
-                // Box::new(book_view)
-            } else {
-                // Library view
-            }
-        },
-    );
+    let layout = Flex::row().with_child(header).with_child(book_list);
 
-    let books_texts = Scroll::new(List::new(book_text)).vertical();
-    let books_texts_lens = books_texts.lens(AppState::library.then(Library::books));
-    //.lens(AppState::library.then(Library::books));
-    let layout = Flex::row().with_child(header).with_child(books_texts_lens);
     Padding::new(
         Insets::new(PADDING_LG, PADDING_LG, PADDING_LG, PADDING_LG),
         layout,
     )
+}
+
+/* Book item */
+fn book_item() -> impl Widget<Book> {
+    let title = Label::raw().lens(Book::title);
+    // let container = Container::new(Flex::column().with_child(title))
+    //     .rounded(PADDING_LG)
+    //     .padding(PADDING_LG)
+    //     .border(BORDER_LIGHT, 2.0);
+
+    // Clickable widget needs click controller and controller host
+    // let click_controller = Click::new(|ctx: EventCtx, data: &mut Book, _env| {
+    //     let new_window = WindowDesc::new(book_text).window_size((DISPLAY_WIDTH, DISPLAY_HEIGHT));
+    //     ctx.new_window(new_window);
+    // });
+    // let controller_host = ControllerHost::new(container, click_controller);
+
+    let cover = Flex::row().with_child(ViewSwitcher::new(
+        |data: &Book, _env| data.get_image_buf().is_some(),
+        move |f, data, _env| {
+            if *f {
+                Box::new(
+                    Image::new(data.get_image_buf().as_ref().unwrap().as_ref().clone())
+                        .fix_size(100.0, 200.0),
+                )
+            } else {
+                Box::new(Svg::new(COVER_PLACEHOLDER.parse().unwrap()).fill_mode(FillStrat::Fill))
+            }
+        },
+    ));
+    Flex::row().with_child(title).with_child(cover)
 }
 
 /* Header section */
