@@ -28,6 +28,7 @@ use std::collections::HashMap;
 
 /* Home ui builder */
 pub fn build_ui() -> impl Widget<AppState> {
+    let mut scroll_value = Vec2::new(100_f64, 100_f64);
     let header = header();
     let _books_list = Scroll::new(List::new(book_item))
         .vertical()
