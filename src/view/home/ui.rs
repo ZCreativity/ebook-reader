@@ -6,7 +6,7 @@ use druid::widget::{
     Button, Click, ControllerHost, CrossAxisAlignment, Flex, Label, MainAxisAlignment, Padding,
 };
 use druid::widget::{FillStrat, Image, Scroll, Svg, ViewSwitcher};
-use druid::{Color, Insets, Widget, WidgetExt};
+use druid::{Color, EventCtx, Insets, Widget, WidgetExt};
 
 /** Notes on Data and Lens.
    Il tratto Lens permette di accedere ad una porzione di una struttura dati
@@ -40,7 +40,10 @@ fn header() -> impl Widget<AppState> {
     let header_label = Label::new(APP_NAME).with_font(TITLE);
 
     let add_book_button =
-        Button::new("Add book").on_click(|_, data: &mut AppState, _| data.add_book());
+        Button::new("Add book").on_click(|ctx: &mut EventCtx, data: &mut AppState, _| {
+            ctx.request_update();
+            data.add_book();
+        });
 
     let mut header = Flex::row()
         .with_child(header_label)
@@ -53,9 +56,6 @@ fn header() -> impl Widget<AppState> {
 }
 
 fn books_container() -> impl Widget<Library> {
-    // let books_list = Flex::row().with_child(List::new(book_item).horizontal())
-    //    .lens(AppState::library.then(Library::books));
-
     let container = Flex::row().with_child(ViewSwitcher::new(
         |data: &Library, _env| (data.get_length() > 0_f64), //Se ho libri in libreria
         move |f, data, _env| {
