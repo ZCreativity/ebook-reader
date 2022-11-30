@@ -1,10 +1,10 @@
-use crate::helper::config::{COVER_PLACEHOLDER, PADDING_LG, TITLE, AUTHOR, ALERT};
+use crate::helper::config::{COVER_PLACEHOLDER, PADDING_LG, TITLE, ALERT};
 use crate::model::book::Book;
 use crate::model::library::Library;
 use crate::{AppState, APP_NAME};
-use druid::widget::{Button, Flex, Label, List, MainAxisAlignment, Padding, Container, CrossAxisAlignment, Click, ControllerHost};
+use druid::widget::{Button, Flex, Label, MainAxisAlignment, Padding, CrossAxisAlignment, Click, ControllerHost};
 use druid::widget::{FillStrat, Image, Scroll, Svg, ViewSwitcher};
-use druid::{Insets, LensExt, Widget, WidgetExt,Color, TextAlignment, lens};
+use druid::{Insets, Widget, WidgetExt,Color};
 
 /** Notes on Data and Lens.
    Il tratto Lens permette di accedere ad una porzione di una struttura dati
@@ -64,7 +64,7 @@ fn books_container() -> impl Widget<Library> {
                 
                 let mut col = Flex::column().cross_axis_alignment(CrossAxisAlignment::Start);
                 let books = data.get_books_vec();
-                let mut component_vector = Vec::new(); //Vettore di componenti fatti con la funzione di giu
+                let mut component_vector = Vec::new(); //Vettore di componenti fatti con la funzione di gui
 
                 for book in books {
                     component_vector.push(book_component(book));
@@ -76,7 +76,7 @@ fn books_container() -> impl Widget<Library> {
                         let component = component_vector.pop();
                         match component {
                             Some(x) => { row = row.with_child(x)}
-                            None => { println!("No child")}
+                            None => { }
                         }
                     }
                     col = col.with_child(row);
@@ -102,7 +102,8 @@ fn book_component(book: Book) -> impl Widget<Library> {
     let author = Label::new(book.get_author().as_str());
     
     let mut book_layout = Flex::row();
-    let col_cover = Image::new(book.get_image_buf().as_ref().unwrap().as_ref().clone()).fix_size(100.0, 200.0);
+
+    //TODO: Gestire il caso di mancanza della copertina
 
     let mut col_details = Flex::column().cross_axis_alignment(CrossAxisAlignment::Start);
     col_details.add_child(title);
@@ -110,7 +111,16 @@ fn book_component(book: Book) -> impl Widget<Library> {
     col_details.add_child(author);
     col_details.add_spacer(50.0);
 
-    book_layout.add_child(col_cover);
+    match book.get_image_buf() {
+        Some(_) => {
+            let cover = Image::new(book.get_image_buf().unwrap().as_ref().clone()).fix_size(100.0, 200.0);
+            book_layout.add_child(Flex::column().with_child(cover));
+            }
+        None => { 
+            let cover = Svg::new(COVER_PLACEHOLDER.parse().unwrap()).fill_mode(FillStrat::Fill);
+            book_layout.add_child(Flex::column().with_child(cover))
+        }
+    }
     book_layout.add_spacer(10.0);
     book_layout.add_child(col_details);
 
@@ -123,53 +133,4 @@ fn book_component(book: Book) -> impl Widget<Library> {
                                               Click::new(|_, _, _| println!("Click")));
 
     return controller_host;
-}
-
-/* Book item */
-fn book_item() -> impl Widget<Book> {
-    let title = Label::raw().lens(Book::title);
-
-    // // Clickable widget needs click controller and controller host
-    // let click_controller = Click::new(|_ctx, data: &mut Book, _env| {
-    //     // TODO: Open new window with book data
-    //     println!("Clicked book {}", data.get_title())
-    // });
-    // let controller_host = ControllerHost::new(container, click_controller);
-
-    let cover = Flex::row().with_child(ViewSwitcher::new(
-        |data: &Book, _env| data.get_image_buf().is_some(),
-        move |f, data, _env| {
-            if *f {
-                Box::new(
-                    Image::new(data.get_image_buf().as_ref().unwrap().as_ref().clone())
-                        .fix_size(100.0, 200.0),
-                )
-            } else {
-                Box::new(Svg::new(COVER_PLACEHOLDER.parse().unwrap()).fill_mode(FillStrat::Fill))
-            }
-        },
-    ));
-    let author= Label::raw().with_font(AUTHOR).lens(Book::author);
-
-
-    let mut book_layout = Flex::row();
-    let col_cover = Flex::column().with_child(cover);
-
-    let mut col_details = Flex::column();
-    col_details.add_child(title);
-    col_details.add_spacer(10.0);
-    col_details.add_child(author);
-    col_details.add_spacer(50.0);
-
-    book_layout.add_child(col_cover);
-    book_layout.add_spacer(10.0);
-    book_layout.add_child(col_details);
-
-    let container = Container::new(book_layout)
-         .fix_size(296.0, 200.0)
-         .padding(2.0)
-         .border(Color::YELLOW, 2.0);
-
-    
-    return container;
 }
