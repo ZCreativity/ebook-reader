@@ -22,6 +22,7 @@ impl DocController {
         };
 
         let title = doc.mdata("title").unwrap();
+        let author = doc.mdata("creator").unwrap();
 
         // Cover
         let cover_data = doc.get_cover().unwrap();
@@ -42,8 +43,8 @@ impl DocController {
         };
 
         match cover_path {
-            None => { Some(Book::new(doc, title, String::new())) }
-            Some(cover_path) => { Some(Book::new(doc, title, cover_path)) }
+            None => { Some(Book::new(doc, title, author, String::new())) }
+            Some(cover_path) => { Some(Book::new(doc, title, author, cover_path)) }
         }
     }
 }
