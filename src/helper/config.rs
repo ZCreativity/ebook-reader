@@ -1,4 +1,4 @@
-use druid::{FontDescriptor, FontFamily, FontWeight,FontStyle};
+use druid::{FontDescriptor, FontFamily, FontWeight};
 
 /* UI */
 pub const DISPLAY_WIDTH: f64 = 1000.0;
@@ -18,8 +18,8 @@ pub const TITLE: FontDescriptor = FontDescriptor::new(FontFamily::SERIF)
     .with_weight(FontWeight::BOLD);
 
 /*pub const AUTHOR: FontDescriptor = FontDescriptor::new(FontFamily::SERIF)
-    .with_size(AUTHOR_SIZE)
-    .with_style(FontStyle::Italic);*/
+.with_size(AUTHOR_SIZE)
+.with_style(FontStyle::Italic);*/
 
 pub const ALERT: FontDescriptor = FontDescriptor::new(FontFamily::SANS_SERIF)
     .with_size(ALERT_SIZE)
