@@ -6,7 +6,7 @@ use crate::view::book::ui::book_view;
 use crate::{AppState, APP_NAME};
 use druid::widget::{
     Button, Click, ControllerHost, CrossAxisAlignment, Flex, Label, List, MainAxisAlignment,
-    Padding,
+    Padding, FlexParams,
 };
 use druid::widget::{FillStrat, Image, Scroll, Svg, ViewSwitcher};
 use druid::{Color, EventCtx, Insets, LensExt, Widget, WidgetExt};
@@ -50,7 +50,7 @@ fn library_view() -> impl Widget<AppState> {
 
     let mut layout = Flex::column();
     layout.add_child(header);
-    layout.add_child(book_list);
+    layout.add_flex_child(book_list,1000.0);
 
     Padding::new(
         Insets::new(PADDING_LG, PADDING_LG, PADDING_LG, PADDING_LG),
@@ -77,10 +77,10 @@ fn book_item() -> impl Widget<Book> {
         },
     ));
 
-    let button = Button::new("Open").on_click(|ctx, data: &mut Book, _env| {
+    /*let button = Button::new("Open").on_click(|ctx, data: &mut Book, _env| {
         println!("Opening book: {}", data.get_title());
         ctx.submit_command(OPEN_BOOK.with(data.clone()));
-    });
+    });*/
 
     let mut book_layout = Flex::row();
 
@@ -100,8 +100,12 @@ fn book_item() -> impl Widget<Book> {
         .fix_size(340.0, 200.0)
         .padding(2.0)
         .border(Color::GRAY, 2_f64);
-
-    let controller_host = ControllerHost::new(container, Click::new(|_, _, _| println!("Click")));
+    
+    //Removed "open" button and used the click on the box!
+    let controller_host = ControllerHost::new(container, Click::new(|ctx, data: &mut Book, _env| {
+        println!("Opening book: {}", data.get_title());
+        ctx.submit_command(OPEN_BOOK.with(data.clone()));
+    }));
 
     return controller_host;
 }
