@@ -44,13 +44,13 @@ pub fn build_ui() -> impl Widget<AppState> {
 /* Library View */
 fn library_view() -> impl Widget<AppState> {
     let header = header();
-    let book_list = Flex::row().with_child(Scroll::new(List::new(book_item))
+    let book_list = Scroll::new(List::new(book_item))
         .vertical()
-        .lens(AppState::library.then(Library::books))); // Lens chaining
+        .lens(AppState::library.then(Library::books)); // Lens chaining
 
     let mut layout = Flex::column();
     layout.add_child(header);
-    layout.add_child(Flexbook_list);
+    layout.add_child(book_list);
 
     Padding::new(
         Insets::new(PADDING_LG, PADDING_LG, PADDING_LG, PADDING_LG),
