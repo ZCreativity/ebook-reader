@@ -1,12 +1,15 @@
+use crate::controller::app_delegate::OPEN_BOOK;
 use crate::helper::config::{ALERT, COVER_PLACEHOLDER, PADDING_LG, TITLE};
 use crate::model::book::Book;
 use crate::model::library::Library;
+use crate::view::book::ui::book_view;
 use crate::{AppState, APP_NAME};
 use druid::widget::{
-    Button, Click, ControllerHost, CrossAxisAlignment, Flex, Label, MainAxisAlignment, Padding,
+    Button, Click, ControllerHost, CrossAxisAlignment, Flex, Label, List, MainAxisAlignment,
+    Padding,
 };
 use druid::widget::{FillStrat, Image, Scroll, Svg, ViewSwitcher};
-use druid::{Color, EventCtx, Insets, Widget, WidgetExt};
+use druid::{Color, EventCtx, Insets, LensExt, Widget, WidgetExt};
 
 /** Notes on Data and Lens.
    Il tratto Lens permette di accedere ad una porzione di una struttura dati
@@ -20,20 +23,65 @@ use druid::{Color, EventCtx, Insets, Widget, WidgetExt};
 
 /* Home ui builder */
 pub fn build_ui() -> impl Widget<AppState> {
-    let mut scroll_value = Vec2::new(100_f64, 100_f64);
+    // View switcher for book view and library view
+    let view_switcher = ViewSwitcher::new(
+        |data: &AppState, _env| data.get_opened_book().is_some(),
+        |f, _data, _env| {
+            if *f {
+                Box::new(book_view())
+            } else {
+                Box::new(library_view())
+            }
+        },
+    );
+
+    Padding::new(
+        Insets::new(PADDING_LG, PADDING_LG, PADDING_LG, PADDING_LG),
+        view_switcher,
+    )
+}
+
+/* Library View */
+fn library_view() -> impl Widget<AppState> {
     let header = header();
+    let book_list = Scroll::new(List::new(book_item))
+        .vertical()
+        .lens(AppState::library.then(Library::books)); // Lens chaining
 
-    let container = books_container().lens(AppState::library);
-
-    let layout = Flex::column()
-        .with_child(header)
-        .with_child(container)
-        .fix_height(500.0);
+    let layout = Flex::row().with_child(header).with_child(book_list);
 
     Padding::new(
         Insets::new(PADDING_LG, PADDING_LG, PADDING_LG, PADDING_LG),
         layout,
     )
+}
+
+/* Book item */
+fn book_item() -> impl Widget<Book> {
+    let title = Label::raw().lens(Book::title);
+
+    let cover = Flex::row().with_child(ViewSwitcher::new(
+        |data: &Book, _env| data.get_image_buf().is_some(),
+        move |f, data, _env| {
+            if *f {
+                Box::new(
+                    Image::new(data.get_image_buf().as_ref().unwrap().as_ref().clone())
+                        .fix_size(100.0, 200.0),
+                )
+            } else {
+                Box::new(Svg::new(COVER_PLACEHOLDER.parse().unwrap()).fill_mode(FillStrat::Fill))
+            }
+        },
+    ));
+
+    let button = Button::new("Open").on_click(|ctx, data: &mut Book, _env| {
+        println!("Opening book: {}", data.get_title());
+        ctx.submit_command(OPEN_BOOK.with(data.clone()));
+    });
+    Flex::row()
+        .with_child(title)
+        .with_child(cover)
+        .with_child(button)
 }
 
 /* Header section */

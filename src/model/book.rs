@@ -16,7 +16,12 @@ pub struct Book {
 }
 
 impl Book {
-    pub fn new(doc: EpubDoc<BufReader<File>>, title: String, author: String, cover_path: String) -> Self {
+    pub fn new(
+        doc: EpubDoc<BufReader<File>>,
+        title: String,
+        author: String,
+        cover_path: String,
+    ) -> Self {
         // Extract cover image from cover_path
         let cover = if cover_path.is_empty() {
             None
@@ -50,7 +55,7 @@ impl Book {
     }
 
     pub fn get_title(&self) -> String {
-         self.title.clone()
+        self.title.clone()
     }
 
     pub fn get_author(&self) -> String {
