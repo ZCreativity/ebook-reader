@@ -1,14 +1,12 @@
+use crate::controller::app_delegate::OPEN_BOOK;
 use crate::helper::config::{COVER_PLACEHOLDER, PADDING_LG, TITLE};
 use crate::model::book::Book;
 use crate::model::library::Library;
-use crate::view::book::ui::build_ui_book;
+use crate::view::book::ui::book_view;
 use crate::{AppState, APP_NAME};
-use druid::widget::{
-    Button, Click, Controller, ControllerHost, Either, Flex, Label, List, MainAxisAlignment,
-    Padding,
-};
+use druid::widget::{Button, Flex, Label, List, MainAxisAlignment, Padding};
 use druid::widget::{FillStrat, Image, Scroll, Svg, ViewSwitcher};
-use druid::{EventCtx, Insets, LensExt, Widget, WidgetExt};
+use druid::{Insets, LensExt, Widget, WidgetExt};
 
 /** Notes on Data and Lens.
    Il tratto Lens permette di accedere ad una porzione di una struttura dati
@@ -23,15 +21,20 @@ use druid::{EventCtx, Insets, LensExt, Widget, WidgetExt};
 /* Home ui builder */
 pub fn build_ui() -> impl Widget<AppState> {
     // View switcher for book view and library view
-    let either = Either::new(
+    let view_switcher = ViewSwitcher::new(
         |data: &AppState, _env| data.get_opened_book().is_some(),
-        build_ui_book(),
-        library_view().controller(controller),
+        |f, _data, _env| {
+            if *f {
+                Box::new(book_view())
+            } else {
+                Box::new(library_view())
+            }
+        },
     );
 
     Padding::new(
         Insets::new(PADDING_LG, PADDING_LG, PADDING_LG, PADDING_LG),
-        either,
+        view_switcher,
     )
 }
 
@@ -53,17 +56,6 @@ fn library_view() -> impl Widget<AppState> {
 /* Book item */
 fn book_item() -> impl Widget<Book> {
     let title = Label::raw().lens(Book::title);
-    // let container = Container::new(Flex::column().with_child(title))
-    //     .rounded(PADDING_LG)
-    //     .padding(PADDING_LG)
-    //     .border(BORDER_LIGHT, 2.0);
-
-    // Clickable widget needs click controller and controller host
-    // let click_controller = Click::new(|ctx: EventCtx, data: &mut Book, _env| {
-    //     let new_window = WindowDesc::new(book_text).window_size((DISPLAY_WIDTH, DISPLAY_HEIGHT));
-    //     ctx.new_window(new_window);
-    // });
-    // let controller_host = ControllerHost::new(container, click_controller);
 
     let cover = Flex::row().with_child(ViewSwitcher::new(
         |data: &Book, _env| data.get_image_buf().is_some(),
@@ -78,7 +70,15 @@ fn book_item() -> impl Widget<Book> {
             }
         },
     ));
-    Flex::row().with_child(title).with_child(cover)
+
+    let button = Button::new("Open").on_click(|ctx, data: &mut Book, _env| {
+        println!("Opening book: {}", data.get_title());
+        ctx.submit_command(OPEN_BOOK.with(data.clone()));
+    });
+    Flex::row()
+        .with_child(title)
+        .with_child(cover)
+        .with_child(button)
 }
 
 /* Header section */

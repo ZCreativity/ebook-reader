@@ -1,20 +1,18 @@
-use crate::helper::config::{COVER_PLACEHOLDER, PADDING_LG};
+use crate::controller::app_delegate::CLOSE_BOOK;
+use crate::helper::config::PADDING_LG;
 use crate::model::book::Book;
 use crate::model::library::Library;
 use crate::AppState;
-
-use druid::widget::{CrossAxisAlignment, Flex, Label, List, Padding};
-use druid::widget::{FillStrat, Image, Scroll, Svg, ViewSwitcher};
+use druid::widget::{Button, CrossAxisAlignment, Flex, Label, List, Padding};
+use druid::widget::{Scroll, ViewSwitcher};
 use druid::Widget;
-
 use druid::{Color, FontStyle};
 use druid::{FontDescriptor, FontFamily, FontWeight, Insets, LensExt, WidgetExt};
-
 use html2text::from_read_rich;
 use html2text::render::text_renderer::{RichAnnotation, TaggedLine};
 use std::collections::HashMap;
 
-pub fn build_ui_book() -> impl Widget<AppState> {
+pub fn book_view() -> impl Widget<AppState> {
     let books_texts = Scroll::new(List::new(book_text)).vertical();
     let books_texts_lens = books_texts.lens(AppState::library.then(Library::books));
     let layout = Flex::row().with_child(books_texts_lens);
@@ -29,6 +27,12 @@ fn book_text() -> impl Widget<Book> {
         |data: &Book, _env| data.get_doc().is_some(),
         move |f, data, _env| {
             if *f {
+                // Back button
+                let back_button = Button::new("Back").on_click(|ctx, _data: &mut Book, _env| {
+                    println!("Going back");
+                    ctx.submit_command(CLOSE_BOOK);
+                });
+
                 let doc = data.get_doc().unwrap(); //Cosi prendo il clone fatto tramite Arc, lo unwrappo e ho il mutex
                 let mut doc_mut = doc.lock().unwrap(); //Prendo il mutex, lo blocco, e poi posso usarlo
                 let length = doc_mut.spine.len();
@@ -48,6 +52,7 @@ fn book_text() -> impl Widget<Book> {
                 let new_vector = vect.concat();
                 let mut flex: Flex<Book> =
                     Flex::column().cross_axis_alignment(CrossAxisAlignment::Start);
+                flex.add_child(back_button);
 
                 for line in new_vector.iter() {
                     let mut h: i32 = 0;
@@ -123,7 +128,7 @@ fn book_text() -> impl Widget<Book> {
                     }
                 }
 
-                Box::new(flex) //Dentro data ho il Book
+                Box::new(flex) // Dentro data ho il Book
             } else {
                 Box::new(Flex::column())
             }

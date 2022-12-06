@@ -47,7 +47,7 @@ impl Book {
         self.doc.as_ref().cloned()
     }
 
-    // pub fn get_title(&self) -> String {
-    //     self.title.clone()
-    // }
+    pub fn get_title(&self) -> String {
+        self.title.clone()
+    }
 }
