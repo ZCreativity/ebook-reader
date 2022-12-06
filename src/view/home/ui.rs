@@ -50,7 +50,7 @@ fn library_view() -> impl Widget<AppState> {
 
     let mut layout = Flex::column();
     layout.add_child(header);
-    layout.add_flex_child(book_list,1000.0);
+    layout.add_flex_child(book_list,1.0);
 
     Padding::new(
         Insets::new(PADDING_LG, PADDING_LG, PADDING_LG, PADDING_LG),
@@ -88,7 +88,6 @@ fn book_item() -> impl Widget<Book> {
     col_details.add_child(title);
     col_details.add_spacer(10.0);
     col_details.add_child(author);
-    col_details.add_child(button);
     col_details.add_spacer(50.0);
 
     book_layout.add_child(cover);
