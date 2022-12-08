@@ -57,6 +57,7 @@ fn book_text() -> impl Widget<Book> {
             if *f {
                 let doc = data.get_doc().unwrap(); //Cosi prendo il clone fatto tramite Arc, lo unwrappo e ho il mutex
                 let mut doc_mut = doc.lock().unwrap(); //Prendo il mutex, lo blocco, e poi posso usarlo
+                doc_mut.set_current_page(0).unwrap(); // Setto la pagina corrente a 0
                 let length = doc_mut.spine.len();
                 let mut vect = Vec::<Vec<TaggedLine<Vec<RichAnnotation>>>>::new();
 
