@@ -4,7 +4,7 @@ use crate::model::book::Book;
 use crate::model::library::Library;
 use crate::view::book::ui::book_view;
 use crate::{AppState, APP_NAME};
-use druid::widget::{Button, Either, Flex, Label, List, MainAxisAlignment, Padding};
+use druid::widget::{Button, Flex, Label, List, MainAxisAlignment, Padding};
 use druid::widget::{FillStrat, Image, Scroll, Svg, ViewSwitcher};
 use druid::{Insets, LensExt, Widget, WidgetExt};
 
