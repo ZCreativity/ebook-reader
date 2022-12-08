@@ -39,6 +39,14 @@ impl Book {
         }
     }
 
+    pub fn new_empty() -> Self {
+        Self {
+            doc: None,
+            title: String::new(),
+            cover: None,
+        }
+    }
+
     pub fn get_image_buf(&self) -> Option<Arc<ImageBuf>> {
         self.cover.as_ref().cloned()
     }

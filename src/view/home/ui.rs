@@ -4,7 +4,7 @@ use crate::model::book::Book;
 use crate::model::library::Library;
 use crate::view::book::ui::book_view;
 use crate::{AppState, APP_NAME};
-use druid::widget::{Button, Flex, Label, List, MainAxisAlignment, Padding};
+use druid::widget::{Button, Either, Flex, Label, List, MainAxisAlignment, Padding};
 use druid::widget::{FillStrat, Image, Scroll, Svg, ViewSwitcher};
 use druid::{Insets, LensExt, Widget, WidgetExt};
 
@@ -22,10 +22,10 @@ use druid::{Insets, LensExt, Widget, WidgetExt};
 pub fn build_ui() -> impl Widget<AppState> {
     // View switcher for book view and library view
     let view_switcher = ViewSwitcher::new(
-        |data: &AppState, _env| data.get_opened_book().is_some(),
+        |data: &AppState, _env| data.get_is_reading_book(),
         |f, _data, _env| {
             if *f {
-                Box::new(book_view())
+                Box::new(book_view().lens(AppState::opened_book))
             } else {
                 Box::new(library_view())
             }

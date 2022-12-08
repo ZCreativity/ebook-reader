@@ -1,24 +1,21 @@
 use crate::controller::app_delegate::CLOSE_BOOK;
 use crate::helper::config::PADDING_LG;
 use crate::model::book::Book;
-use crate::model::library::Library;
-use crate::AppState;
-use druid::widget::{Button, CrossAxisAlignment, Flex, Label, List, Padding};
+use druid::widget::{Button, CrossAxisAlignment, Flex, Label, Padding};
 use druid::widget::{Scroll, ViewSwitcher};
 use druid::Widget;
 use druid::{Color, FontStyle};
-use druid::{FontDescriptor, FontFamily, FontWeight, Insets, LensExt, WidgetExt};
+use druid::{FontDescriptor, FontFamily, FontWeight, Insets};
 use html2text::from_read_rich;
 use html2text::render::text_renderer::{RichAnnotation, TaggedLine};
 use std::collections::HashMap;
 
-pub fn book_view() -> impl Widget<AppState> {
-    let books_texts = Scroll::new(List::new(book_text)).vertical();
-    let books_texts_lens = books_texts.lens(AppState::library.then(Library::books));
-    let layout = Flex::row().with_child(books_texts_lens);
+pub fn book_view() -> impl Widget<Book> {
+    // Return a widget that can be used to display a book
+    let book_text = book_text();
     Padding::new(
         Insets::new(PADDING_LG, PADDING_LG, PADDING_LG, PADDING_LG),
-        layout,
+        book_text,
     )
 }
 
