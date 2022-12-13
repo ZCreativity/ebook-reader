@@ -1,12 +1,12 @@
 use crate::controller::app_delegate::OPEN_BOOK;
-use crate::helper::config::{ALERT, COVER_PLACEHOLDER, PADDING_LG, TITLE};
+use crate::helper::config::{COVER_PLACEHOLDER, PADDING_LG, TITLE};
 use crate::model::book::Book;
 use crate::model::library::Library;
 use crate::view::book::ui::book_view;
 use crate::{AppState, APP_NAME};
 use druid::widget::{
     Button, Click, ControllerHost, CrossAxisAlignment, Flex, Label, List, MainAxisAlignment,
-    Padding, FlexParams,
+    Padding,
 };
 use druid::widget::{FillStrat, Image, Scroll, Svg, ViewSwitcher};
 use druid::{Color, EventCtx, Insets, LensExt, Widget, WidgetExt};
@@ -50,7 +50,7 @@ fn library_view() -> impl Widget<AppState> {
 
     let mut layout = Flex::column();
     layout.add_child(header);
-    layout.add_flex_child(book_list,1.0);
+    layout.add_flex_child(book_list, 1.0);
 
     Padding::new(
         Insets::new(PADDING_LG, PADDING_LG, PADDING_LG, PADDING_LG),
@@ -99,12 +99,15 @@ fn book_item() -> impl Widget<Book> {
         .fix_size(340.0, 200.0)
         .padding(2.0)
         .border(Color::GRAY, 2_f64);
-    
+
     //Removed "open" button and used the click on the box!
-    let controller_host = ControllerHost::new(container, Click::new(|ctx, data: &mut Book, _env| {
-        println!("Opening book: {}", data.get_title());
-        ctx.submit_command(OPEN_BOOK.with(data.clone()));
-    }));
+    let controller_host = ControllerHost::new(
+        container,
+        Click::new(|ctx, data: &mut Book, _env| {
+            println!("Opening book: {}", data.get_title());
+            ctx.submit_command(OPEN_BOOK.with(data.clone()));
+        }),
+    );
 
     return controller_host;
 }

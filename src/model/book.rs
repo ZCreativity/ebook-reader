@@ -66,8 +66,4 @@ impl Book {
     pub fn get_title(&self) -> String {
         self.title.clone()
     }
-
-    pub fn get_author(&self) -> String {
-        self.author.clone()
-    }
 }
