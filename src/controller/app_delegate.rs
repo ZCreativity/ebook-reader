@@ -19,6 +19,7 @@ impl AppDelegate<AppState> for Delegate {
         _env: &druid::Env,
     ) -> Handled {
         if let Some(book) = cmd.get(OPEN_BOOK) {
+            println!("Opening book: {}", book.get_title());
             data.open_book(book.clone());
             return Handled::Yes;
         }

@@ -25,10 +25,10 @@ use druid::{Color, EventCtx, Insets, LensExt, Widget, WidgetExt};
 pub fn build_ui() -> impl Widget<AppState> {
     // View switcher for book view and library view
     let view_switcher = ViewSwitcher::new(
-        |data: &AppState, _env| data.get_opened_book().is_some(),
+        |data: &AppState, _env| data.get_is_reading_book(),
         |f, _data, _env| {
             if *f {
-                Box::new(book_view())
+                Box::new(book_view().lens(AppState::opened_book))
             } else {
                 Box::new(library_view())
             }
