@@ -1,7 +1,7 @@
-use crate::controller::app_delegate::CLOSE_BOOK;
-use crate::helper::config::PADDING_LG;
+use crate::controller::app_delegate::{CLOSE_BOOK, NEXT_PAGE, PREV_PAGE};
+use crate::helper::config::{DISPLAY_WIDTH, PADDING_LG};
 use crate::model::book::Book;
-use druid::widget::{Button, CrossAxisAlignment, Flex, Label, Padding};
+use druid::widget::{Button, CrossAxisAlignment, Flex, Label, MainAxisAlignment, Padding};
 use druid::widget::{Scroll, ViewSwitcher};
 use druid::{Color, FontStyle};
 use druid::{FontDescriptor, FontFamily, FontWeight, Insets};
@@ -12,7 +12,7 @@ use std::collections::HashMap;
 
 pub fn book_view() -> impl Widget<Book> {
     // Return a widget that can be used to display a book
-    let book_text = Scroll::new(book_text()).vertical().fix_height(650.0);
+    let book_text = Scroll::new(book_text()).vertical().fix_height(550.0);
     let book_menu = book_menu();
 
     Padding::new(
@@ -39,11 +39,33 @@ fn book_menu() -> impl Widget<Book> {
         ctx.submit_command(CLOSE_BOOK);
     });
 
-    let flex = Flex::row()
+    let next_page_button = Button::new("Next page").on_click(|ctx, _data: &mut Book, _env| {
+        println!("Going to next page");
+        ctx.submit_command(NEXT_PAGE);
+    });
+
+    let prev_page_button = Button::new("Previous page").on_click(|ctx, _data: &mut Book, _env| {
+        println!("Going to previous page");
+        ctx.submit_command(PREV_PAGE);
+    });
+
+    let flex_left = Flex::row()
         .with_child(back_button)
         .with_child(edit_button)
         .with_child(change_font_button)
         .cross_axis_alignment(CrossAxisAlignment::Start)
+        .must_fill_main_axis(true);
+
+    let flex_right = Flex::row()
+        .with_child(prev_page_button)
+        .with_child(next_page_button)
+        .cross_axis_alignment(CrossAxisAlignment::End)
+        .must_fill_main_axis(true);
+
+    let flex = Flex::row()
+        .with_child(flex_left)
+        .with_child(flex_right)
+        .main_axis_alignment(MainAxisAlignment::SpaceBetween)
         .must_fill_main_axis(true)
         .padding(Insets::new(0.0, 0.0, 0.0, PADDING_LG));
 
@@ -57,20 +79,16 @@ fn book_text() -> impl Widget<Book> {
             if *f {
                 let doc = data.get_doc().unwrap(); //Cosi prendo il clone fatto tramite Arc, lo unwrappo e ho il mutex
                 let mut doc_mut = doc.lock().unwrap(); //Prendo il mutex, lo blocco, e poi posso usarlo
-                doc_mut.set_current_page(0).unwrap(); // Setto la pagina corrente a 0
+                doc_mut.set_current_page(1).unwrap(); // Setto la pagina corrente a 0
                 let length = doc_mut.spine.len();
                 let mut vect = Vec::<Vec<TaggedLine<Vec<RichAnnotation>>>>::new();
 
-                //println!("{:?}", doc_mut.resources);
-
-                for _ in 0..length {
-                    let page = doc_mut.get_current_str().unwrap();
-                    vect.push(from_read_rich(page.as_bytes(), 100));
-                    // TODO: Fix error here: "Error: last page when opening same book for the second time"
-                    match doc_mut.go_next() {
-                        Ok(_) => (),
-                        Err(err) => println!("Error: {}", err),
-                    }
+                for _ in 0..length {}
+                let page = doc_mut.get_current_str().unwrap();
+                vect.push(from_read_rich(page.as_bytes(), 100));
+                match doc_mut.go_next() {
+                    Ok(_) => (),
+                    Err(err) => println!("Error: {}", err),
                 }
 
                 let new_vector = vect.concat();
@@ -160,7 +178,8 @@ fn book_text() -> impl Widget<Book> {
                 Box::new(Flex::column())
             }
         },
-    ));
+    ))
+    .fix_width(DISPLAY_WIDTH - PADDING_LG * 2.0);
 
     Flex::column().with_child(doc)
 }
@@ -179,12 +198,12 @@ fn emphasis(s: &str, mut flex: Flex<Book>, h: i32) -> Flex<Book> {
     if h > 0 {
         flex = flex.with_child(h_label_emphasis(s, h));
     } else {
-        flex = flex.with_child(
-            default_with_descriptor(s, FontDescriptor::new(FontFamily::SYSTEM_UI)
+        flex = flex.with_child(default_with_descriptor(
+            s,
+            FontDescriptor::new(FontFamily::SYSTEM_UI)
                 .with_style(FontStyle::Italic)
-                .with_size(16_f64)
-            )
-        );
+                .with_size(16_f64),
+        ));
     }
 
     flex
@@ -209,7 +228,7 @@ fn default_with_color(s: &str, color: Color) -> impl Widget<Book> {
     Label::new(s).with_text_color(color)
 }
 
-fn default_with_descriptor(s: &str, descr: FontDescriptor) -> impl Widget<Book>{
+fn default_with_descriptor(s: &str, descr: FontDescriptor) -> impl Widget<Book> {
     Label::new(s).with_font(descr)
 }
 

@@ -36,7 +36,11 @@ impl AppState {
         self.is_reading_book
     }
 
-    // pub fn get_opened_book(&self) -> Book {
-    //     self.opened_book.clone()
-    // }
+    pub fn next_page(&mut self) {
+        println!("Next page");
+    }
+
+    pub fn prev_page(&mut self) {
+        println!("Prev page");
+    }
 }
