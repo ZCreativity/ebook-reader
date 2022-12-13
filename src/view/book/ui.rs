@@ -61,7 +61,7 @@ fn book_text() -> impl Widget<Book> {
                 let length = doc_mut.spine.len();
                 let mut vect = Vec::<Vec<TaggedLine<Vec<RichAnnotation>>>>::new();
 
-                println!("{:?}", doc_mut.resources);
+                //println!("{:?}", doc_mut.resources);
 
                 for _ in 0..length {
                     let page = doc_mut.get_current_str().unwrap();
@@ -77,7 +77,11 @@ fn book_text() -> impl Widget<Book> {
                 let mut flex: Flex<Book> =
                     Flex::column().cross_axis_alignment(CrossAxisAlignment::Start);
 
-                for line in new_vector.iter() {
+                for (i, line) in new_vector.iter().enumerate() {
+                    if i < 1000 {
+                        println!("Line {} -> {:?}", i, line);
+                    }
+
                     let mut h: i32 = 0;
                     let mut flag: bool = false;
                     let mut line_str = String::from("");
@@ -175,7 +179,12 @@ fn emphasis(s: &str, mut flex: Flex<Book>, h: i32) -> Flex<Book> {
     if h > 0 {
         flex = flex.with_child(h_label_emphasis(s, h));
     } else {
-        flex = flex.with_child(default(s));
+        flex = flex.with_child(
+            default_with_descriptor(s, FontDescriptor::new(FontFamily::SYSTEM_UI)
+                .with_style(FontStyle::Italic)
+                .with_size(16_f64)
+            )
+        );
     }
 
     flex
@@ -198,6 +207,10 @@ fn default(s: &str) -> impl Widget<Book> {
 
 fn default_with_color(s: &str, color: Color) -> impl Widget<Book> {
     Label::new(s).with_text_color(color)
+}
+
+fn default_with_descriptor(s: &str, descr: FontDescriptor) -> impl Widget<Book>{
+    Label::new(s).with_font(descr)
 }
 
 fn h_label(s: &str, h: i32) -> Label<Book> {

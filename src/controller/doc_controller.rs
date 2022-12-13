@@ -22,9 +22,16 @@ impl DocController {
         };
 
         let title = doc.mdata("title").unwrap();
+        let author = doc.mdata("creator").unwrap();
 
         // Cover
-        let cover_data = doc.get_cover().unwrap();
+        let cover_data = match doc.get_cover() {
+            Ok(cover_data) => cover_data,
+            Err(e) => {
+                println!("Error: {}", e);
+                return None;
+            }
+        };
         let mut cover_path = String::from(COVERS_PATH);
         cover_path
             .push_str(format!("{}.png", doc.mdata("title").unwrap().replace(' ', "-")).as_str());
@@ -52,8 +59,8 @@ impl DocController {
         };
 
         match cover_path {
-            None => Some(Book::new(doc, title, String::new())),
-            Some(cover_path) => Some(Book::new(doc, title, cover_path)),
+            None => Some(Book::new(doc, title, author, String::new())),
+            Some(cover_path) => Some(Book::new(doc, title, author, cover_path)),
         }
     }
 }

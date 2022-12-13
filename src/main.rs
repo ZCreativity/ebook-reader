@@ -15,7 +15,6 @@ fn main() -> Result<(), PlatformError> {
 
     let main_window = WindowDesc::new(build_ui)
         .window_size((DISPLAY_WIDTH, DISPLAY_HEIGHT))
-        .resizable(false)
         .title(APP_NAME);
     AppLauncher::with_window(main_window)
         .delegate(Delegate)

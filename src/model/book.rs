@@ -10,12 +10,18 @@ use crate::helper::functions::path_to_bytes;
 #[derive(Data, Clone, Lens)]
 pub struct Book {
     title: String,
+    author: String,
     cover: Option<Arc<ImageBuf>>,
     doc: Option<Arc<Mutex<EpubDoc<BufReader<File>>>>>,
 }
 
 impl Book {
-    pub fn new(doc: EpubDoc<BufReader<File>>, title: String, cover_path: String) -> Self {
+    pub fn new(
+        doc: EpubDoc<BufReader<File>>,
+        title: String,
+        author: String,
+        cover_path: String,
+    ) -> Self {
         // Extract cover image from cover_path
         let cover = if cover_path.is_empty() {
             None
@@ -35,6 +41,7 @@ impl Book {
         Self {
             doc: Some(Arc::new(Mutex::new(doc))),
             title,
+            author,
             cover,
         }
     }
@@ -57,5 +64,9 @@ impl Book {
 
     pub fn get_title(&self) -> String {
         self.title.clone()
+    }
+
+    pub fn get_author(&self) -> String {
+        self.author.clone()
     }
 }

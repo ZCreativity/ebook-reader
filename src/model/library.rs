@@ -85,4 +85,12 @@ impl Library {
             }
         }
     }
+
+    pub fn get_length(&self) -> f64 {
+        return self.books.len() as f64;
+    }
+
+    pub fn get_books_vec(&self) -> Vector<Book> {
+        self.books.clone()
+    }
 }
