@@ -7,6 +7,7 @@ pub struct AppState {
     library: Library,
     is_reading_book: bool,
     opened_book: Book,
+    current_page: usize,
 }
 
 impl AppState {
@@ -16,6 +17,7 @@ impl AppState {
             library: Library::new(),
             is_reading_book: false,
             opened_book: empty_book,
+            current_page: 1,
         }
     }
 
@@ -34,13 +36,5 @@ impl AppState {
 
     pub fn get_is_reading_book(&self) -> bool {
         self.is_reading_book
-    }
-
-    pub fn next_page(&mut self) {
-        println!("Next page");
-    }
-
-    pub fn prev_page(&mut self) {
-        println!("Prev page");
     }
 }

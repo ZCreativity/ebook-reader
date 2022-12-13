@@ -1,7 +1,9 @@
-use crate::controller::app_delegate::{CLOSE_BOOK, NEXT_PAGE, PREV_PAGE};
+use crate::controller::app_delegate::CLOSE_BOOK;
 use crate::helper::config::{DISPLAY_WIDTH, PADDING_LG};
 use crate::model::book::Book;
-use druid::widget::{Button, CrossAxisAlignment, Flex, Label, MainAxisAlignment, Padding};
+use druid::widget::{
+    Button, CrossAxisAlignment, Flex, Label, MainAxisAlignment, Padding, SizedBox,
+};
 use druid::widget::{Scroll, ViewSwitcher};
 use druid::{Color, FontStyle};
 use druid::{FontDescriptor, FontFamily, FontWeight, Insets};
@@ -14,10 +16,14 @@ pub fn book_view() -> impl Widget<Book> {
     // Return a widget that can be used to display a book
     let book_text = Scroll::new(book_text()).vertical().fix_height(550.0);
     let book_menu = book_menu();
+    let book_controls = book_controls();
 
     Padding::new(
         Insets::new(PADDING_LG, PADDING_LG, PADDING_LG, PADDING_LG),
-        Flex::column().with_child(book_menu).with_child(book_text),
+        Flex::column()
+            .with_child(book_menu)
+            .with_child(book_text)
+            .with_child(book_controls),
     )
 }
 
@@ -39,51 +45,63 @@ fn book_menu() -> impl Widget<Book> {
         ctx.submit_command(CLOSE_BOOK);
     });
 
-    let next_page_button = Button::new("Next page").on_click(|ctx, _data: &mut Book, _env| {
-        println!("Going to next page");
-        ctx.submit_command(NEXT_PAGE);
-    });
-
-    let prev_page_button = Button::new("Previous page").on_click(|ctx, _data: &mut Book, _env| {
-        println!("Going to previous page");
-        ctx.submit_command(PREV_PAGE);
-    });
-
-    let flex_left = Flex::row()
+    let flex = Flex::row()
         .with_child(back_button)
         .with_child(edit_button)
         .with_child(change_font_button)
         .cross_axis_alignment(CrossAxisAlignment::Start)
-        .must_fill_main_axis(true);
-
-    let flex_right = Flex::row()
-        .with_child(prev_page_button)
-        .with_child(next_page_button)
-        .cross_axis_alignment(CrossAxisAlignment::End)
-        .must_fill_main_axis(true);
-
-    let flex = Flex::row()
-        .with_child(flex_left)
-        .with_child(flex_right)
-        .main_axis_alignment(MainAxisAlignment::SpaceBetween)
         .must_fill_main_axis(true)
         .padding(Insets::new(0.0, 0.0, 0.0, PADDING_LG));
 
     flex
 }
 
+fn book_controls() -> impl Widget<Book> {
+    let control_next = ViewSwitcher::new(
+        |data: &Book, _env| data.has_next_page(),
+        |f, _data, _env| {
+            if *f {
+                Box::new(Button::new("Next").on_click(|ctx, data: &mut Book, _env| {
+                    data.next_page();
+                    ctx.request_update();
+                }))
+            } else {
+                Box::new(SizedBox::empty())
+            }
+        },
+    );
+
+    let control_prev = ViewSwitcher::new(
+        |data: &Book, _env| data.has_prev_page(),
+        |f, _data, _env| {
+            if *f {
+                Box::new(Button::new("Prev").on_click(|ctx, data: &mut Book, _env| {
+                    data.prev_page();
+                    ctx.request_update();
+                }))
+            } else {
+                Box::new(SizedBox::empty())
+            }
+        },
+    );
+
+    Flex::row()
+        .with_child(control_prev)
+        .with_child(control_next)
+        .must_fill_main_axis(true)
+        .main_axis_alignment(MainAxisAlignment::End)
+}
+
 fn book_text() -> impl Widget<Book> {
     let doc = Scroll::new(ViewSwitcher::new(
-        |data: &Book, _env| data.get_doc().is_some(),
+        |data: &Book, _env| data.get_doc().is_some() && data.get_current_page() > 0,
         move |f, data, _env| {
             if *f {
                 let doc = data.get_doc().unwrap(); //Cosi prendo il clone fatto tramite Arc, lo unwrappo e ho il mutex
                 let mut doc_mut = doc.lock().unwrap(); //Prendo il mutex, lo blocco, e poi posso usarlo
-                doc_mut.set_current_page(1).unwrap(); // Setto la pagina corrente a 0
-                let length = doc_mut.spine.len();
+                doc_mut.set_current_page(data.get_current_page()).unwrap(); // Setto la pagina corrente a 0
                 let mut vect = Vec::<Vec<TaggedLine<Vec<RichAnnotation>>>>::new();
 
-                for _ in 0..length {}
                 let page = doc_mut.get_current_str().unwrap();
                 vect.push(from_read_rich(page.as_bytes(), 100));
                 match doc_mut.go_next() {
@@ -95,6 +113,7 @@ fn book_text() -> impl Widget<Book> {
                 let mut flex: Flex<Book> =
                     Flex::column().cross_axis_alignment(CrossAxisAlignment::Start);
 
+                // Render
                 for (i, line) in new_vector.iter().enumerate() {
                     if i < 1000 {
                         println!("Line {} -> {:?}", i, line);
@@ -183,6 +202,8 @@ fn book_text() -> impl Widget<Book> {
 
     Flex::column().with_child(doc)
 }
+
+// fn book_chapter() -> impl Widget<Book> {}
 
 fn no_tag(s: &str, mut flex: Flex<Book>, h: i32) -> Flex<Book> {
     if h > 0 {

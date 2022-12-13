@@ -77,11 +77,6 @@ fn book_item() -> impl Widget<Book> {
         },
     ));
 
-    /*let button = Button::new("Open").on_click(|ctx, data: &mut Book, _env| {
-        println!("Opening book: {}", data.get_title());
-        ctx.submit_command(OPEN_BOOK.with(data.clone()));
-    });*/
-
     let mut book_layout = Flex::row();
 
     let mut col_details = Flex::column().cross_axis_alignment(CrossAxisAlignment::Start);
@@ -117,8 +112,7 @@ fn header() -> impl Widget<AppState> {
     let header_label = Label::new(APP_NAME).with_font(TITLE);
 
     let add_book_button =
-        Button::new("Add book").on_click(|ctx: &mut EventCtx, data: &mut AppState, _| {
-            ctx.request_update();
+        Button::new("Add book").on_click(|_ctx: &mut EventCtx, data: &mut AppState, _| {
             data.add_book();
         });
 
