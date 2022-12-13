@@ -50,6 +50,7 @@ impl Book {
         Self {
             doc: None,
             title: String::new(),
+            author: String::new(),
             cover: None,
         }
     }
