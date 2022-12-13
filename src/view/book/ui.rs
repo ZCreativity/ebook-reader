@@ -1,25 +1,53 @@
 use crate::controller::app_delegate::CLOSE_BOOK;
 use crate::helper::config::PADDING_LG;
 use crate::model::book::Book;
-use crate::model::library::Library;
-use crate::AppState;
-use druid::widget::{Button, CrossAxisAlignment, Flex, Label, List, Padding};
+use druid::widget::{Button, CrossAxisAlignment, Flex, Label, Padding};
 use druid::widget::{Scroll, ViewSwitcher};
-use druid::Widget;
 use druid::{Color, FontStyle};
-use druid::{FontDescriptor, FontFamily, FontWeight, Insets, LensExt, WidgetExt};
+use druid::{FontDescriptor, FontFamily, FontWeight, Insets};
+use druid::{Widget, WidgetExt};
 use html2text::from_read_rich;
 use html2text::render::text_renderer::{RichAnnotation, TaggedLine};
 use std::collections::HashMap;
 
-pub fn book_view() -> impl Widget<AppState> {
-    let books_texts = Scroll::new(List::new(book_text)).vertical();
-    let books_texts_lens = books_texts.lens(AppState::library.then(Library::books));
-    let layout = Flex::row().with_child(books_texts_lens);
+pub fn book_view() -> impl Widget<Book> {
+    // Return a widget that can be used to display a book
+    let book_text = Scroll::new(book_text()).vertical().fix_height(650.0);
+    let book_menu = book_menu();
+
     Padding::new(
         Insets::new(PADDING_LG, PADDING_LG, PADDING_LG, PADDING_LG),
-        layout,
+        Flex::column().with_child(book_menu).with_child(book_text),
     )
+}
+
+fn book_menu() -> impl Widget<Book> {
+    let back_button = Button::new("Back").on_click(|ctx, _data: &mut Book, _env| {
+        println!("Going back");
+        ctx.submit_command(CLOSE_BOOK);
+    });
+
+    let edit_button = Button::new("Edit").on_click(|ctx, _data: &mut Book, _env| {
+        println!("Editing book");
+        // For now just close the book
+        ctx.submit_command(CLOSE_BOOK);
+    });
+
+    let change_font_button = Button::new("Change font").on_click(|ctx, _data: &mut Book, _env| {
+        println!("Changing font");
+        // For now just close the book
+        ctx.submit_command(CLOSE_BOOK);
+    });
+
+    let flex = Flex::row()
+        .with_child(back_button)
+        .with_child(edit_button)
+        .with_child(change_font_button)
+        .cross_axis_alignment(CrossAxisAlignment::Start)
+        .must_fill_main_axis(true)
+        .padding(Insets::new(0.0, 0.0, 0.0, PADDING_LG));
+
+    flex
 }
 
 fn book_text() -> impl Widget<Book> {
@@ -27,14 +55,9 @@ fn book_text() -> impl Widget<Book> {
         |data: &Book, _env| data.get_doc().is_some(),
         move |f, data, _env| {
             if *f {
-                // Back button
-                let back_button = Button::new("Back").on_click(|ctx, _data: &mut Book, _env| {
-                    println!("Going back");
-                    ctx.submit_command(CLOSE_BOOK);
-                });
-
                 let doc = data.get_doc().unwrap(); //Cosi prendo il clone fatto tramite Arc, lo unwrappo e ho il mutex
                 let mut doc_mut = doc.lock().unwrap(); //Prendo il mutex, lo blocco, e poi posso usarlo
+                doc_mut.set_current_page(0).unwrap(); // Setto la pagina corrente a 0
                 let length = doc_mut.spine.len();
                 let mut vect = Vec::<Vec<TaggedLine<Vec<RichAnnotation>>>>::new();
 
@@ -43,6 +66,7 @@ fn book_text() -> impl Widget<Book> {
                 for _ in 0..length {
                     let page = doc_mut.get_current_str().unwrap();
                     vect.push(from_read_rich(page.as_bytes(), 100));
+                    // TODO: Fix error here: "Error: last page when opening same book for the second time"
                     match doc_mut.go_next() {
                         Ok(_) => (),
                         Err(err) => println!("Error: {}", err),
@@ -52,7 +76,6 @@ fn book_text() -> impl Widget<Book> {
                 let new_vector = vect.concat();
                 let mut flex: Flex<Book> =
                     Flex::column().cross_axis_alignment(CrossAxisAlignment::Start);
-                flex.add_child(back_button);
 
                 for (i, line) in new_vector.iter().enumerate() {
                     if i < 1000 {
