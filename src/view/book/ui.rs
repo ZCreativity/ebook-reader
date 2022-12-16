@@ -11,7 +11,10 @@ use druid::{Widget, WidgetExt};
 
 pub fn book_view() -> impl Widget<Book> {
     // Return a widget that can be used to display a book
-    let book_text = Scroll::new(book_text()).vertical().fix_height(650.0);
+    let book_text = Scroll::new(book_text())
+        .vertical()
+        .fix_height(600.0)
+        .expand_width();
     let book_menu = book_menu();
     let book_controls = book_controls();
 

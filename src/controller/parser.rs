@@ -13,7 +13,7 @@ use html2text::{
 use crate::model::book::Book;
 
 pub fn parse(page: String, _font_size: f64) -> Flex<Book> {
-    let mut flex = Flex::column();
+    let mut flex = Flex::column().cross_axis_alignment(druid::widget::CrossAxisAlignment::Start);
     let mut vect = Vec::<Vec<TaggedLine<Vec<RichAnnotation>>>>::new();
     vect.push(from_read_rich(page.as_bytes(), 100));
 
