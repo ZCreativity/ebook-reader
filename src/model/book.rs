@@ -13,7 +13,7 @@ pub struct Book {
     author: String,
     cover: Option<Arc<ImageBuf>>,
     doc: Option<Arc<Mutex<EpubDoc<BufReader<File>>>>>,
-    current_page: usize,
+    current_page_index: usize,
 }
 
 impl Book {
@@ -44,7 +44,7 @@ impl Book {
             title,
             author,
             cover,
-            current_page: 1,
+            current_page_index: 1,
         }
     }
 
@@ -54,7 +54,7 @@ impl Book {
             title: String::new(),
             author: String::new(),
             cover: None,
-            current_page: 0,
+            current_page_index: 0,
         }
     }
 
@@ -78,48 +78,49 @@ impl Book {
     }
 
     pub fn get_current_page(&self) -> usize {
-        self.current_page
-    }
-
-    pub fn next_page(&mut self) {
-        println!("Next page");
-        if self.has_next_page() {
-            self.current_page += 1;
-        }
-        match self
-            .get_doc()
-            .unwrap()
-            .lock()
-            .unwrap()
-            .set_current_page(self.current_page)
-        {
-            Ok(_) => (),
-            Err(e) => eprintln!("Error setting next page: {}", e),
-        }
-    }
-
-    pub fn prev_page(&mut self) {
-        println!("Prev page");
-        if self.has_prev_page() {
-            self.current_page -= 1;
-        }
-        match self
-            .get_doc()
-            .unwrap()
-            .lock()
-            .unwrap()
-            .set_current_page(self.current_page)
-        {
-            Ok(_) => (),
-            Err(e) => eprintln!("Error setting prev page: {}", e),
-        }
+        self.current_page_index
     }
 
     pub fn has_next_page(&self) -> bool {
-        self.get_book_length() > self.current_page
+        self.current_page_index < self.get_book_length()
     }
 
     pub fn has_prev_page(&self) -> bool {
-        self.current_page > 1
+        self.current_page_index > 1
+    }
+
+    pub fn next_page(&mut self) -> Option<String> {
+        if self.has_next_page() {
+            self.current_page_index += 1;
+            let doc = self.get_doc().unwrap();
+            let mut doc_mut = doc.lock().unwrap();
+            doc_mut.set_current_page(self.current_page_index).unwrap();
+            Some(doc_mut.get_current_str().unwrap())
+        } else {
+            None
+        }
+    }
+
+    pub fn prev_page(&mut self) -> Option<String> {
+        if self.has_prev_page() {
+            self.current_page_index -= 1;
+            let doc = self.get_doc().unwrap();
+            let mut doc_mut = doc.lock().unwrap();
+            doc_mut.set_current_page(self.current_page_index).unwrap();
+            Some(doc_mut.get_current_str().unwrap())
+        } else {
+            None
+        }
+    }
+
+    pub fn get_page_str(&self, page_index: usize) -> Option<String> {
+        if page_index > 0 && page_index <= self.get_book_length() {
+            let doc = self.get_doc().unwrap();
+            let mut doc_mut = doc.lock().unwrap();
+            doc_mut.set_current_page(page_index).unwrap();
+            Some(doc_mut.get_current_str().unwrap())
+        } else {
+            None
+        }
     }
 }

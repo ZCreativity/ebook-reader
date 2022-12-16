@@ -99,7 +99,6 @@ fn book_item() -> impl Widget<Book> {
     let controller_host = ControllerHost::new(
         container,
         Click::new(|ctx, data: &mut Book, _env| {
-            println!("Opening book: {}", data.get_title());
             ctx.submit_command(OPEN_BOOK.with(data.clone()));
         }),
     );
