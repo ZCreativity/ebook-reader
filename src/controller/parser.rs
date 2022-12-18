@@ -10,7 +10,7 @@ use html2text::{
     render::text_renderer::{RichAnnotation, TaggedLine},
 };
 
-use crate::model::book::Book;
+use crate::{helper::config::DEFAULT_FONT_SIZE, model::book::Book};
 
 pub fn parse(page: String) -> impl Widget<Book> {
     let view_switcher = ViewSwitcher::new(
@@ -69,7 +69,7 @@ pub fn parse(page: String) -> impl Widget<Book> {
 
                     //If no tag are present, just append a simple Label with normal text
                     if tag_vect.is_empty() {
-                        let no_tag = no_tag(line_str.as_str(), h);
+                        let no_tag = no_tag(line_str.as_str(), h, *font_size_offset);
                         flex.add_child(no_tag);
                     }
 
@@ -86,7 +86,7 @@ pub fn parse(page: String) -> impl Widget<Book> {
                             }
                             Image => (),
                             Emphasis => {
-                                let emphasis = emphasis(line_str.as_str(), h);
+                                let emphasis = emphasis(line_str.as_str(), h, *font_size_offset);
                                 flex.add_child(emphasis);
                             }
                             Strong => (),
@@ -105,22 +105,22 @@ pub fn parse(page: String) -> impl Widget<Book> {
     view_switcher
 }
 
-pub fn no_tag(s: &str, h: i32) -> Label<Book> {
+pub fn no_tag(s: &str, h: i32, font_size_offset: f64) -> Label<Book> {
     if h > 0 {
-        return h_label(s, h);
+        return h_label(s, h, font_size_offset);
     }
-    default(s)
+    default(s, font_size_offset)
 }
 
-pub fn emphasis(s: &str, h: i32) -> Label<Book> {
+pub fn emphasis(s: &str, h: i32, font_size_offset: f64) -> Label<Book> {
     if h > 0 {
-        return h_label_emphasis(s, h);
+        return h_label_emphasis(s, h, font_size_offset);
     }
     default_with_descriptor(
         s,
         FontDescriptor::new(FontFamily::SYSTEM_UI)
             .with_style(FontStyle::Italic)
-            .with_size(16_f64),
+            .with_size(DEFAULT_FONT_SIZE + font_size_offset),
     )
 }
 
@@ -131,32 +131,32 @@ pub fn link(s: &str, h: i32, font_size_offset: f64) -> Label<Book> {
     default_with_color(s, Color::AQUA, font_size_offset)
 }
 
-pub fn default(s: &str) -> Label<Book> {
-    Label::new(s)
+pub fn default(s: &str, font_size_offset: f64) -> Label<Book> {
+    Label::new(s).with_text_size(DEFAULT_FONT_SIZE + font_size_offset)
 }
 
 pub fn default_with_color(s: &str, color: Color, font_size_offset: f64) -> Label<Book> {
     Label::new(s)
         .with_text_color(color)
-        .with_text_size(16.0 + font_size_offset)
+        .with_text_size(DEFAULT_FONT_SIZE + font_size_offset)
 }
 
 pub fn default_with_descriptor(s: &str, descr: FontDescriptor) -> Label<Book> {
     Label::new(s).with_font(descr)
 }
 
-pub fn h_label(s: &str, h: i32) -> Label<Book> {
+pub fn h_label(s: &str, h: i32, font_size_offset: f64) -> Label<Book> {
     Label::new(s).with_font(
         FontDescriptor::new(FontFamily::SANS_SERIF)
-            .with_size(h_font_size(h))
+            .with_size(h_font_size(h) + font_size_offset)
             .with_weight(FontWeight::BOLD),
     )
 }
 
-pub fn h_label_emphasis(s: &str, h: i32) -> Label<Book> {
+pub fn h_label_emphasis(s: &str, h: i32, font_size_offset: f64) -> Label<Book> {
     Label::new(s).with_font(
         FontDescriptor::new(FontFamily::SYSTEM_UI)
-            .with_size(h_font_size(h))
+            .with_size(h_font_size(h) + font_size_offset)
             .with_weight(FontWeight::BOLD)
             .with_style(FontStyle::Italic),
     )

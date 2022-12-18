@@ -13,6 +13,8 @@ pub const PADDING_LG: f64 = 32.0;
 // pub const PADDING_XL: f64 = 64.0;
 
 /* Text Styles */
+
+pub const DEFAULT_FONT_SIZE: f64 = 16.0;
 pub const TITLE: FontDescriptor = FontDescriptor::new(FontFamily::SERIF)
     .with_size(TITLE_SIZE)
     .with_weight(FontWeight::BOLD);
