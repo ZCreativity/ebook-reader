@@ -39,16 +39,21 @@ fn book_menu() -> impl Widget<Book> {
         ctx.submit_command(CLOSE_BOOK);
     });
 
-    let change_font_button = Button::new("Change font").on_click(|ctx, _data: &mut Book, _env| {
-        println!("Changing font");
-        // For now just close the book
-        ctx.submit_command(CLOSE_BOOK);
+    let increase_font_button = Button::new("Aa +").on_click(|_ctx, data: &mut Book, _env| {
+        println!("Increasing font");
+        data.increase_font_size();
+    });
+
+    let decrease_font_button = Button::new("Aa -").on_click(|_ctx, data: &mut Book, _env| {
+        println!("Decreasing font");
+        data.decrease_font_size();
     });
 
     let flex = Flex::row()
         .with_child(back_button)
         .with_child(edit_button)
-        .with_child(change_font_button)
+        .with_child(increase_font_button)
+        .with_child(decrease_font_button)
         .cross_axis_alignment(CrossAxisAlignment::Start)
         .must_fill_main_axis(true)
         .padding(Insets::new(0.0, 0.0, 0.0, PADDING_LG));
@@ -61,9 +66,8 @@ fn book_controls() -> impl Widget<Book> {
         |data: &Book, _env| data.has_next_page(),
         |f, _data, _env| {
             if *f {
-                Box::new(Button::new("Next").on_click(|ctx, data: &mut Book, _env| {
+                Box::new(Button::new("Next").on_click(|_ctx, data: &mut Book, _env| {
                     data.next_page();
-                    ctx.request_update();
                 }))
             } else {
                 Box::new(SizedBox::empty())
@@ -75,9 +79,8 @@ fn book_controls() -> impl Widget<Book> {
         |data: &Book, _env| data.has_prev_page(),
         |f, _data, _env| {
             if *f {
-                Box::new(Button::new("Prev").on_click(|ctx, data: &mut Book, _env| {
+                Box::new(Button::new("Prev").on_click(|_ctx, data: &mut Book, _env| {
                     data.prev_page();
-                    ctx.request_update();
                 }))
             } else {
                 Box::new(SizedBox::empty())
@@ -99,7 +102,7 @@ fn book_text() -> impl Widget<Book> {
             let page = data.get_page_str(*index);
             match page {
                 Some(page) => {
-                    let page_flex = parse(page, 24.0);
+                    let page_flex = parse(page);
                     Box::new(page_flex)
                 }
                 None => Box::new(Label::new("No page")),

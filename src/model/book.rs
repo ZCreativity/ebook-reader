@@ -14,6 +14,7 @@ pub struct Book {
     cover: Option<Arc<ImageBuf>>,
     doc: Option<Arc<Mutex<EpubDoc<BufReader<File>>>>>,
     current_page_index: usize,
+    font_size_offset: f64,
 }
 
 impl Book {
@@ -45,6 +46,7 @@ impl Book {
             author,
             cover,
             current_page_index: 1,
+            font_size_offset: 0.0,
         }
     }
 
@@ -55,6 +57,7 @@ impl Book {
             author: String::new(),
             cover: None,
             current_page_index: 0,
+            font_size_offset: 0.0,
         }
     }
 
@@ -89,27 +92,15 @@ impl Book {
         self.current_page_index > 1
     }
 
-    pub fn next_page(&mut self) -> Option<String> {
+    pub fn next_page(&mut self) {
         if self.has_next_page() {
             self.current_page_index += 1;
-            let doc = self.get_doc().unwrap();
-            let mut doc_mut = doc.lock().unwrap();
-            doc_mut.set_current_page(self.current_page_index).unwrap();
-            Some(doc_mut.get_current_str().unwrap())
-        } else {
-            None
         }
     }
 
-    pub fn prev_page(&mut self) -> Option<String> {
+    pub fn prev_page(&mut self) {
         if self.has_prev_page() {
             self.current_page_index -= 1;
-            let doc = self.get_doc().unwrap();
-            let mut doc_mut = doc.lock().unwrap();
-            doc_mut.set_current_page(self.current_page_index).unwrap();
-            Some(doc_mut.get_current_str().unwrap())
-        } else {
-            None
         }
     }
 
@@ -122,5 +113,17 @@ impl Book {
         } else {
             None
         }
+    }
+
+    pub fn get_font_size_offset(&self) -> f64 {
+        self.font_size_offset
+    }
+
+    pub fn increase_font_size(&mut self) {
+        self.font_size_offset += 2.0;
+    }
+
+    pub fn decrease_font_size(&mut self) {
+        self.font_size_offset -= 2.0;
     }
 }

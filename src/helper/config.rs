@@ -25,6 +25,23 @@ pub const TITLE: FontDescriptor = FontDescriptor::new(FontFamily::SERIF)
 //     .with_size(ALERT_SIZE)
 //     .with_weight(FontWeight::BOLD);
 
+// From Google
+// h1 | 2em    | 32px
+// h2 | 1.5em  | 24px
+// h3 | 1.17em | 18.72px
+// h4 | 1em    | 16px
+// h5 | 0.83em | 13.28px
+// h6 | 0.67em | 10.72px
+
+// pub let h_sizes: HashMap<i32, f64> = HashMap::from([
+//     (1, 32_f64),
+//     (2, 24_f64),
+//     (3, 18.72_f64),
+//     (4, 16_f64),
+//     (5, 13.28_f64),
+//     (6, 10.72_f64),
+// ]);
+
 /* Data */
 pub const LIBRARY_PATH: &str = "./src/library";
 pub const COVERS_PATH: &str = "./src/library/covers/";

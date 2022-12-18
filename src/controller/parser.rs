@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use druid::{
-    widget::{Flex, Label},
-    Color, FontDescriptor, FontFamily, FontStyle, FontWeight,
+    widget::{Flex, Label, ViewSwitcher},
+    Color, FontDescriptor, FontFamily, FontStyle, FontWeight, Widget,
 };
 
 use html2text::{
@@ -12,89 +12,97 @@ use html2text::{
 
 use crate::model::book::Book;
 
-pub fn parse(page: String, _font_size: f64) -> Flex<Book> {
-    let mut flex = Flex::column().cross_axis_alignment(druid::widget::CrossAxisAlignment::Start);
-    let mut vect = Vec::<Vec<TaggedLine<Vec<RichAnnotation>>>>::new();
-    vect.push(from_read_rich(page.as_bytes(), 100));
+pub fn parse(page: String) -> impl Widget<Book> {
+    let view_switcher = ViewSwitcher::new(
+        |data: &Book, _env| data.get_font_size_offset(),
+        move |font_size_offset, _data, _env| {
+            let mut flex =
+                Flex::column().cross_axis_alignment(druid::widget::CrossAxisAlignment::Start);
+            let mut vect = Vec::<Vec<TaggedLine<Vec<RichAnnotation>>>>::new();
+            vect.push(from_read_rich(page.as_bytes(), 100));
 
-    let new_vector = vect.concat();
-    // Render
-    for (_i, line) in new_vector.iter().enumerate() {
-        let mut h: i32 = 0;
-        let mut flag: bool = false;
-        let mut line_str = String::from("");
-        let mut tag_vect = Vec::<RichAnnotation>::new();
+            let new_vector = vect.concat();
+            // Render
+            for (_i, line) in new_vector.iter().enumerate() {
+                let mut h: i32 = 0;
+                let mut flag: bool = false;
+                let mut line_str = String::from("");
+                let mut tag_vect = Vec::<RichAnnotation>::new();
 
-        //If TaggedLine is not empty but does not have TaggedStrings => skip = true
-        //so that no useless lines are added
-        let skip: bool = line.iter().peekable().peek().is_some()
-            && line.tagged_strings().peekable().peek().is_none();
+                //If TaggedLine is not empty but does not have TaggedStrings => skip = true
+                //so that no useless lines are added
+                let skip: bool = line.iter().peekable().peek().is_some()
+                    && line.tagged_strings().peekable().peek().is_none();
 
-        if !skip {
-            //Check elements in the vector of tagged string, each TaggedLine can contain multiple
-            //TaggedString(s), this loop set the h flags, add text to the label and produce a vector of
-            //RichAnnotation, after the loop we generate a Label with the overall text of the line
-            //and with the given attributes, like font_size, font_style etc...
-            for tagged_string in line.tagged_strings() {
-                //If h has not been set yet, check if possible h label is being handled,
-                //if a tag is already being handled (h > 0), just go ahead
-                if h == 0 {
-                    (h, flag) = check_h(tagged_string.s.as_str());
-                }
+                if !skip {
+                    //Check elements in the vector of tagged string, each TaggedLine can contain multiple
+                    //TaggedString(s), this loop set the h flags, add text to the label and produce a vector of
+                    //RichAnnotation, after the loop we generate a Label with the overall text of the line
+                    //and with the given attributes, like font_size, font_style etc...
+                    for tagged_string in line.tagged_strings() {
+                        //If h has not been set yet, check if possible h label is being handled,
+                        //if a tag is already being handled (h > 0), just go ahead
+                        if h == 0 {
+                            (h, flag) = check_h(tagged_string.s.as_str());
+                        }
 
-                //Each TaggedString can have multiple tags (uncommon), tag_vec makes a copy of the said vec
-                let tags = tagged_string.clone().tag;
+                        //Each TaggedString can have multiple tags (uncommon), tag_vec makes a copy of the said vec
+                        let tags = tagged_string.clone().tag;
 
-                //If not in a h specifier, add a label with given attributes, an h specifier with this library
-                //is formatted as a TaggedString with no tag before the actual string that need styling
-                //just checking h > 0 is not exhaustive, as we can have just normal string where h is 0
-                if !flag {
-                    //Add the text to label
-                    line_str = [line_str, tagged_string.s.clone()].join("");
+                        //If not in a h specifier, add a label with given attributes, an h specifier with this library
+                        //is formatted as a TaggedString with no tag before the actual string that need styling
+                        //just checking h > 0 is not exhaustive, as we can have just normal string where h is 0
+                        if !flag {
+                            //Add the text to label
+                            line_str = [line_str, tagged_string.s.clone()].join("");
 
-                    //Else save all the flags in a vector
-                    for tag in tags.iter() {
-                        tag_vect.push(tag.clone());
+                            //Else save all the flags in a vector
+                            for tag in tags.iter() {
+                                tag_vect.push(tag.clone());
+                            }
+                        }
+
+                        flag = false;
+                    }
+
+                    use RichAnnotation::*;
+
+                    //If no tag are present, just append a simple Label with normal text
+                    if tag_vect.is_empty() {
+                        let no_tag = no_tag(line_str.as_str(), h);
+                        flex.add_child(no_tag);
+                    }
+
+                    //Else add Label with correct style
+                    //TODO: add missing case
+                    //TODO: if more than one tag, this doesn't work, it's gonna add multiple child (even if rare)
+                    //TODO: lines with h should be centered
+                    for tag in tag_vect.iter() {
+                        match tag {
+                            Default => {}
+                            Link(_) => {
+                                let link = link(line_str.as_str(), h, *font_size_offset);
+                                flex.add_child(link);
+                            }
+                            Image => (),
+                            Emphasis => {
+                                let emphasis = emphasis(line_str.as_str(), h);
+                                flex.add_child(emphasis);
+                            }
+                            Strong => (),
+                            Strikeout => (),
+                            Code => (),
+                            Preformat(_) => (),
+                        }
                     }
                 }
-
-                flag = false;
             }
 
-            use RichAnnotation::*;
+            Box::new(flex)
+        },
+    );
 
-            //If no tag are present, just append a simple Label with normal text
-            if tag_vect.is_empty() {
-                let no_tag = no_tag(line_str.as_str(), h);
-                flex.add_child(no_tag);
-            }
-
-            //Else add Label with correct style
-            //TODO: add missing case
-            //TODO: if more than one tag, this doesn't work, it's gonna add multiple child (even if rare)
-            //TODO: lines with h should be centered
-            for tag in tag_vect.iter() {
-                match tag {
-                    Default => {}
-                    Link(_) => {
-                        let link = link(line_str.as_str(), h);
-                        flex.add_child(link);
-                    }
-                    Image => (),
-                    Emphasis => {
-                        let emphasis = emphasis(line_str.as_str(), h);
-                        flex.add_child(emphasis);
-                    }
-                    Strong => (),
-                    Strikeout => (),
-                    Code => (),
-                    Preformat(_) => (),
-                }
-            }
-        }
-    }
-
-    flex
+    view_switcher
 }
 
 pub fn no_tag(s: &str, h: i32) -> Label<Book> {
@@ -116,19 +124,21 @@ pub fn emphasis(s: &str, h: i32) -> Label<Book> {
     )
 }
 
-pub fn link(s: &str, h: i32) -> Label<Book> {
+pub fn link(s: &str, h: i32, font_size_offset: f64) -> Label<Book> {
     if h > 0 {
-        return h_label_link(s, h);
+        return h_label_link(s, h, font_size_offset);
     }
-    default_with_color(s, Color::AQUA)
+    default_with_color(s, Color::AQUA, font_size_offset)
 }
 
 pub fn default(s: &str) -> Label<Book> {
     Label::new(s)
 }
 
-pub fn default_with_color(s: &str, color: Color) -> Label<Book> {
-    Label::new(s).with_text_color(color)
+pub fn default_with_color(s: &str, color: Color, font_size_offset: f64) -> Label<Book> {
+    Label::new(s)
+        .with_text_color(color)
+        .with_text_size(16.0 + font_size_offset)
 }
 
 pub fn default_with_descriptor(s: &str, descr: FontDescriptor) -> Label<Book> {
@@ -152,10 +162,10 @@ pub fn h_label_emphasis(s: &str, h: i32) -> Label<Book> {
     )
 }
 
-pub fn h_label_link(s: &str, h: i32) -> Label<Book> {
+pub fn h_label_link(s: &str, h: i32, font_size_offset: f64) -> Label<Book> {
     Label::new(s)
         .with_text_color(Color::AQUA)
-        .with_text_size(h_font_size(h))
+        .with_text_size(h_font_size(h) + font_size_offset)
 }
 
 pub fn check_h(s: &str) -> (i32, bool) {
