@@ -1,7 +1,7 @@
 use std::{collections::HashMap, rc::Rc};
 
 use druid::{
-    widget::{ControllerHost, Flex, Label, ViewSwitcher},
+    widget::{Flex, Label, ViewSwitcher},
     Color, FontDescriptor, FontFamily, FontStyle, FontWeight, Widget, WidgetExt,
 };
 
@@ -135,11 +135,11 @@ pub fn emphasis(s: &str, h: i32, font_size_offset: f64) -> Label<Book> {
 pub fn link(s: &str, h: i32, font_size_offset: f64, link: String) -> impl Widget<Book> {
     let link_ref = Rc::new(link.clone());
     if h > 0 {
-        return h_label_link(s, h, font_size_offset).on_click(move |ctx, data, _env| {
+        return h_label_link(s, h, font_size_offset).on_click(move |_ctx, data, _env| {
             data.navigate_to(link_ref.clone());
         });
     }
-    default_with_color(s, Color::AQUA, font_size_offset).on_click(move |ctx, data, _env| {
+    default_with_color(s, Color::AQUA, font_size_offset).on_click(move |_ctx, data, _env| {
         data.navigate_to(link_ref.clone());
     })
 }
