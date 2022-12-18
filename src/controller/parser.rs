@@ -1,8 +1,8 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, rc::Rc};
 
 use druid::{
-    widget::{Flex, Label, ViewSwitcher},
-    Color, FontDescriptor, FontFamily, FontStyle, FontWeight, Widget,
+    widget::{ControllerHost, Flex, Label, ViewSwitcher},
+    Color, FontDescriptor, FontFamily, FontStyle, FontWeight, Widget, WidgetExt,
 };
 
 use html2text::{
@@ -28,6 +28,8 @@ pub fn parse(page: String) -> impl Widget<Book> {
                 let mut flag: bool = false;
                 let mut line_str = String::from("");
                 let mut tag_vect = Vec::<RichAnnotation>::new();
+
+                println!("Line: {:?}", line);
 
                 //If TaggedLine is not empty but does not have TaggedStrings => skip = true
                 //so that no useless lines are added
@@ -80,8 +82,14 @@ pub fn parse(page: String) -> impl Widget<Book> {
                     for tag in tag_vect.iter() {
                         match tag {
                             Default => {}
-                            Link(_) => {
-                                let link = link(line_str.as_str(), h, *font_size_offset);
+                            Link(link_value) => {
+                                println!("link_value: {:?}", link_value);
+                                let link = link(
+                                    line_str.as_str(),
+                                    h,
+                                    *font_size_offset,
+                                    link_value.to_string(),
+                                );
                                 flex.add_child(link);
                             }
                             Image => (),
@@ -124,11 +132,16 @@ pub fn emphasis(s: &str, h: i32, font_size_offset: f64) -> Label<Book> {
     )
 }
 
-pub fn link(s: &str, h: i32, font_size_offset: f64) -> Label<Book> {
+pub fn link(s: &str, h: i32, font_size_offset: f64, link: String) -> impl Widget<Book> {
+    let link_ref = Rc::new(link.clone());
     if h > 0 {
-        return h_label_link(s, h, font_size_offset);
+        return h_label_link(s, h, font_size_offset).on_click(move |ctx, data, _env| {
+            data.navigate_to(link_ref.clone());
+        });
     }
-    default_with_color(s, Color::AQUA, font_size_offset)
+    default_with_color(s, Color::AQUA, font_size_offset).on_click(move |ctx, data, _env| {
+        data.navigate_to(link_ref.clone());
+    })
 }
 
 pub fn default(s: &str, font_size_offset: f64) -> Label<Book> {

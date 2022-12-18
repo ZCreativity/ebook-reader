@@ -3,6 +3,7 @@ use epub::doc::EpubDoc;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::PathBuf;
+use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 
 use crate::helper::functions::path_to_bytes;
@@ -101,6 +102,42 @@ impl Book {
     pub fn prev_page(&mut self) {
         if self.has_prev_page() {
             self.current_page_index -= 1;
+        }
+    }
+
+    pub fn set_page(&mut self, page_index: usize) {
+        println!("Setting page to: {}", page_index);
+        self.current_page_index = page_index;
+    }
+
+    /**
+     * doc.resources
+     * It’s a HashMap<a: String, (b: PathBuf, c: String)> where ‘a’ is the resource id, ‘b’ is the resource full path and ‘c’ is the resource mimetype
+     * Get the resource id of the resource which the resource full path ends with the link
+     */
+    pub fn navigate_to(&mut self, link: Rc<String>) {
+        let binding = self.get_doc().unwrap();
+        let doc = binding.lock().unwrap();
+
+        // From "chapter_001.xhtml" to resource_id in the spine
+        let resource_id = doc
+            .resources
+            .iter()
+            .find(|(_, (path, _))| path.ends_with(link.as_str()))
+            .map(|(id, _)| id);
+
+        match resource_id {
+            Some(resource_id) => {
+                let page_index = doc.resource_id_to_chapter(resource_id);
+                println!(
+                    "Navigating to link: {} (page_index: {:?})",
+                    link, page_index
+                );
+                self.set_page(page_index.unwrap_or(1))
+            }
+            None => {
+                eprintln!("Error navigating to link: {}", link);
+            }
         }
     }
 
