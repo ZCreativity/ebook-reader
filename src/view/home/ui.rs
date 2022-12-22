@@ -3,6 +3,7 @@ use crate::helper::config::{COVER_PLACEHOLDER, PADDING_LG, TITLE};
 use crate::model::book::Book;
 use crate::model::library::Library;
 use crate::view::book::ui::book_view;
+use crate::view::editor::ui::book_editor;
 use crate::{AppState, APP_NAME};
 use druid::widget::{
     Button, Click, ControllerHost, CrossAxisAlignment, Flex, Label, List, MainAxisAlignment,
@@ -30,7 +31,7 @@ pub fn build_ui() -> impl Widget<AppState> {
             if *f {
                 Box::new(book_view().lens(AppState::opened_book))
             } else {
-                Box::new(library_view())
+                Box::new(book_editor().lens(AppState::page_to_edit))
             }
         },
     );
