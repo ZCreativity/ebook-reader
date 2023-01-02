@@ -13,7 +13,9 @@ pub fn book_editor() -> impl Widget<Book> {
                         .controller(UpdateCallback())
                         .lens(Book::current_editing_page)
                         .expand_width(),
-                );
+                )
+                .vertical()
+                .fix_height(600.0);
 
                 Box::new(Flex::column().with_child(textbox))
             } else {
