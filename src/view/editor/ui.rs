@@ -8,10 +8,10 @@ pub fn book_editor() -> impl Widget<Book> {
         |data: &Book, _env: &Env| data.is_editing_book(),
         |editing: &bool, _data: &Book, _env: &Env| {
             if *editing {
-                let textbox = TextBox::new()
+                let textbox = TextBox::multiline()
                     .controller(UpdateCallback())
                     .lens(Book::current_editing_page)
-                    .fix_size(500.0, 600.0);
+                    .fix_size(600.0, 300.0);
                 Box::new(Flex::column().with_child(textbox))
             } else {
                 Box::new(SizedBox::empty())
