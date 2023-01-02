@@ -1,4 +1,4 @@
-use druid::widget::{Flex, SizedBox, TextBox, ViewSwitcher, Widget, WidgetExt};
+use druid::widget::{Flex, Scroll, SizedBox, TextBox, ViewSwitcher, Widget, WidgetExt};
 use druid::{widget::Controller, Env, UpdateCtx};
 
 use crate::model::book::Book;
@@ -8,10 +8,13 @@ pub fn book_editor() -> impl Widget<Book> {
         |data: &Book, _env: &Env| data.is_editing_book(),
         |editing: &bool, _data: &Book, _env: &Env| {
             if *editing {
-                let textbox = TextBox::multiline()
-                    .controller(UpdateCallback())
-                    .lens(Book::current_editing_page)
-                    .fix_size(600.0, 300.0);
+                let textbox = Scroll::new(
+                    TextBox::multiline()
+                        .controller(UpdateCallback())
+                        .lens(Book::current_editing_page)
+                        .expand_width(),
+                );
+
                 Box::new(Flex::column().with_child(textbox))
             } else {
                 Box::new(SizedBox::empty())
