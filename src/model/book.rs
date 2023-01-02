@@ -16,6 +16,8 @@ pub struct Book {
     doc: Option<Arc<Mutex<EpubDoc<BufReader<File>>>>>,
     current_page_index: usize,
     font_size_offset: f64,
+    is_editing: bool,
+    current_editing_page: String,
 }
 
 impl Book {
@@ -48,6 +50,8 @@ impl Book {
             cover,
             current_page_index: 1,
             font_size_offset: 0.0,
+            is_editing: false,
+            current_editing_page: String::new(),
         }
     }
 
@@ -59,6 +63,8 @@ impl Book {
             cover: None,
             current_page_index: 0,
             font_size_offset: 0.0,
+            is_editing: false,
+            current_editing_page: String::new(),
         }
     }
 
@@ -108,6 +114,23 @@ impl Book {
     pub fn set_page(&mut self, page_index: usize) {
         println!("Setting page to: {}", page_index);
         self.current_page_index = page_index;
+    }
+
+    pub fn is_editing_book(&self) -> bool {
+        self.is_editing
+    }
+
+    pub fn set_editing_book(&mut self, is_editing: bool) {
+        self.set_editing_page(self.get_page_str(self.get_current_page()).unwrap());
+        self.is_editing = is_editing;
+    }
+
+    pub fn set_editing_page(&mut self, page: String) {
+        self.current_editing_page = page;
+    }
+
+    pub fn get_editing_page(&self) -> String {
+        self.current_editing_page.clone()
     }
 
     /**

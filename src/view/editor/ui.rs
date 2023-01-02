@@ -1,24 +1,36 @@
-use druid::widget::{TextBox, Widget, WidgetExt};
-use druid::{
-    Env,
-    UpdateCtx,
-    widget::Controller
-};
+use druid::widget::{Flex, SizedBox, TextBox, ViewSwitcher, Widget, WidgetExt};
+use druid::{widget::Controller, Env, UpdateCtx};
 
-pub fn book_editor() -> impl Widget<String>{
-    let textbox = build_root_widget();
-    textbox
+use crate::model::book::Book;
+
+pub fn book_editor() -> impl Widget<Book> {
+    let view_switcher = ViewSwitcher::new(
+        |data: &Book, _env: &Env| data.is_editing_book(),
+        |editing: &bool, _data: &Book, _env: &Env| {
+            if *editing {
+                let textbox = TextBox::new()
+                    .controller(UpdateCallback())
+                    .lens(Book::current_editing_page)
+                    .fix_size(500.0, 600.0);
+                Box::new(Flex::column().with_child(textbox))
+            } else {
+                Box::new(SizedBox::empty())
+            }
+        },
+    );
+    view_switcher
 }
 
 struct UpdateCallback();
 
 impl Controller<String, TextBox<String>> for UpdateCallback {
-    fn update(&mut self, 
-        child: &mut TextBox<String>, 
-        ctx: &mut UpdateCtx<'_, '_>, 
-        old_data: &String, 
-        data: &String, 
-        env: &Env
+    fn update(
+        &mut self,
+        child: &mut TextBox<String>,
+        ctx: &mut UpdateCtx<'_, '_>,
+        old_data: &String,
+        data: &String,
+        env: &Env,
     ) {
         if old_data != data {
             // the data has changed, you can call your function here
@@ -27,8 +39,4 @@ impl Controller<String, TextBox<String>> for UpdateCallback {
         // also inform the child that the data has changed
         child.update(ctx, old_data, data, env)
     }
-}
-
-fn build_root_widget() -> impl Widget<String> {
-    TextBox::new().controller(UpdateCallback())
 }

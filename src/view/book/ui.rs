@@ -1,7 +1,8 @@
-use crate::controller::app_delegate::CLOSE_BOOK;
+use crate::controller::app_delegate::{CLOSE_BOOK, EDIT_PAGE};
 use crate::controller::parser::parse;
 use crate::helper::config::PADDING_LG;
 use crate::model::book::Book;
+use crate::view::editor::ui::book_editor;
 use druid::widget::{
     Button, CrossAxisAlignment, Flex, Label, MainAxisAlignment, Padding, SizedBox,
 };
@@ -11,10 +12,22 @@ use druid::{Widget, WidgetExt};
 
 pub fn book_view() -> impl Widget<Book> {
     // Return a widget that can be used to display a book
-    let book_text = Scroll::new(book_text())
-        .vertical()
-        .fix_height(600.0)
-        .expand_width();
+    let view_switcher = ViewSwitcher::new(
+        |data: &Book, _env| data.is_editing_book(),
+        |editing: &bool, _data: &Book, _env| {
+            if *editing {
+                let book_editing = book_editor();
+                Box::new(book_editing)
+            } else {
+                let book_text = Scroll::new(book_text())
+                    .vertical()
+                    .fix_height(600.0)
+                    .expand_width();
+                Box::new(book_text)
+            }
+        },
+    );
+
     let book_menu = book_menu();
     let book_controls = book_controls();
 
@@ -22,7 +35,7 @@ pub fn book_view() -> impl Widget<Book> {
         Insets::new(PADDING_LG, PADDING_LG, PADDING_LG, PADDING_LG),
         Flex::column()
             .with_child(book_menu)
-            .with_child(book_text)
+            .with_child(view_switcher)
             .with_child(book_controls),
     )
 }
@@ -33,10 +46,10 @@ fn book_menu() -> impl Widget<Book> {
         ctx.submit_command(CLOSE_BOOK);
     });
 
-    let edit_button = Button::new("Edit").on_click(|ctx, _data: &mut Book, _env| {
+    let edit_button = Button::new("Edit").on_click(|ctx, data: &mut Book, _env| {
         println!("Editing book");
         // For now just close the book
-        ctx.submit_command(CLOSE_BOOK);
+        ctx.submit_command(EDIT_PAGE);
     });
 
     let increase_font_button = Button::new("Aa +").on_click(|_ctx, data: &mut Book, _env| {

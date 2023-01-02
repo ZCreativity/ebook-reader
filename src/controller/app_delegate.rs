@@ -4,6 +4,7 @@ use crate::model::{app_state::AppState, book::Book};
 
 // Open book selector
 pub const OPEN_BOOK: Selector<Book> = Selector::new("open-book");
+pub const EDIT_PAGE: Selector = Selector::new("edit-page");
 pub const CLOSE_BOOK: Selector = Selector::new("close-book");
 
 pub struct Delegate;
@@ -25,6 +26,11 @@ impl AppDelegate<AppState> for Delegate {
         }
         if cmd.is(CLOSE_BOOK) {
             data.close_book();
+            return Handled::Yes;
+        }
+        if cmd.is(EDIT_PAGE) {
+            data.edit_page();
+            println!("Editing page");
             return Handled::Yes;
         }
         Handled::No
