@@ -56,18 +56,18 @@ impl Book {
         }
     }
 
-    pub fn new_empty() -> Self {
-        Self {
-            doc: None,
-            title: String::new(),
-            author: String::new(),
-            cover: None,
-            current_page_index: 0,
-            font_size_offset: 0.0,
-            is_editing: false,
-            current_editing_page: String::new(),
-        }
-    }
+    // pub fn new_empty() -> Self {
+    //     Self {
+    //         doc: None,
+    //         title: String::new(),
+    //         author: String::new(),
+    //         cover: None,
+    //         current_page_index: 0,
+    //         font_size_offset: 0.0,
+    //         is_editing: false,
+    //         current_editing_page: String::new(),
+    //     }
+    // }
 
     pub fn get_image_buf(&self) -> Option<Arc<ImageBuf>> {
         self.cover.as_ref().cloned()
@@ -97,7 +97,7 @@ impl Book {
     }
 
     pub fn has_next_page(&self) -> bool {
-        self.current_page_index < self.get_book_length()
+        self.current_page_index < self.get_book_length() - 1
     }
 
     pub fn has_prev_page(&self) -> bool {
@@ -121,22 +121,22 @@ impl Book {
         self.current_page_index = page_index;
     }
 
-    pub fn is_editing_book(&self) -> bool {
-        self.is_editing
-    }
+    // pub fn is_editing_book(&self) -> bool {
+    //     self.is_editing
+    // }
 
-    pub fn set_editing_book(&mut self, is_editing: bool) {
-        self.set_editing_page(self.get_page_str(self.get_current_page()).unwrap());
-        self.is_editing = is_editing;
-    }
+    // pub fn set_editing_book(&mut self, is_editing: bool) {
+    //     self.set_editing_page(self.get_page_str(self.get_current_page()).unwrap());
+    //     self.is_editing = is_editing;
+    // }
 
-    pub fn set_editing_page(&mut self, page: String) {
-        self.current_editing_page = page;
-    }
+    // pub fn set_editing_page(&mut self, page: String) {
+    //     self.current_editing_page = page;
+    // }
 
-    pub fn get_editing_page(&self) -> String {
-        self.current_editing_page.clone()
-    }
+    // pub fn get_editing_page(&self) -> String {
+    //     self.current_editing_page.clone()
+    // }
 
     /**
      * doc.resources
@@ -178,18 +178,6 @@ impl Book {
         } else {
             None
         }
-    }
-
-    pub fn get_font_size_offset(&self) -> f64 {
-        self.font_size_offset
-    }
-
-    pub fn increase_font_size(&mut self) {
-        self.font_size_offset += 2.0;
-    }
-
-    pub fn decrease_font_size(&mut self) {
-        self.font_size_offset -= 2.0;
     }
 }
 

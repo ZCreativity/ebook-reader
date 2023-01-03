@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use crate::{
     controller::view::BOOK_READ,
     helper::config::{APP_NAME, COVER_PLACEHOLDER, PADDING_LG, TITLE},
@@ -12,6 +10,7 @@ use druid::{
     },
     Color, Command, Data, EventCtx, RenderContext, Target, Widget, WidgetExt,
 };
+use std::sync::Arc;
 
 /**
  * Main page and contains list view of books
@@ -126,9 +125,9 @@ fn header() -> impl Widget<AppState> {
 // to list the Book structs
 impl ListIter<(Arc<Vec<UiView>>, Book, Option<usize>, usize)> for AppState {
     fn for_each(&self, mut cb: impl FnMut(&(Arc<Vec<UiView>>, Book, Option<usize>, usize), usize)) {
-        for (idx, contact) in self.library.iter().enumerate() {
+        for (idx, contact) in self.get_library().iter().enumerate() {
             let nav_state = self.nav_state.clone();
-            cb(&(nav_state, contact.clone(), self.selected, idx), idx);
+            cb(&(nav_state, contact.clone(), self.get_selected(), idx), idx);
         }
     }
 
@@ -137,8 +136,13 @@ impl ListIter<(Arc<Vec<UiView>>, Book, Option<usize>, usize)> for AppState {
         mut cb: impl FnMut(&mut (Arc<Vec<UiView>>, Book, Option<usize>, usize), usize),
     ) {
         let mut any_shared_changed = false;
-        for (idx, contact) in self.library.iter().enumerate() {
-            let mut d = (self.nav_state.clone(), contact.clone(), self.selected, idx);
+        for (idx, contact) in self.get_library().iter().enumerate() {
+            let mut d = (
+                self.nav_state.clone(),
+                contact.clone(),
+                self.get_selected(),
+                idx,
+            );
 
             cb(&mut d, idx);
             if !any_shared_changed && !self.nav_state.same(&d.0) {
@@ -146,12 +150,12 @@ impl ListIter<(Arc<Vec<UiView>>, Book, Option<usize>, usize)> for AppState {
             }
             if any_shared_changed {
                 self.nav_state = d.0;
-                self.selected = d.2;
+                self.set_selected(d.2);
             }
         }
     }
 
     fn data_len(&self) -> usize {
-        self.library.len()
+        self.get_library().len()
     }
 }

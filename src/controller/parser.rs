@@ -10,11 +10,11 @@ use html2text::{
     render::text_renderer::{RichAnnotation, TaggedLine},
 };
 
-use crate::{helper::config::DEFAULT_FONT_SIZE, model::book::Book};
+use crate::{helper::config::DEFAULT_FONT_SIZE, model::app_state::AppState};
 
-pub fn parse(page: String) -> impl Widget<Book> {
+pub fn parse(page: String) -> impl Widget<AppState> {
     let view_switcher = ViewSwitcher::new(
-        |data: &Book, _env| data.get_font_size_offset(),
+        |data: &AppState, _env| data.get_font_size(),
         move |font_size_offset, _data, _env| {
             let mut flex =
                 Flex::column().cross_axis_alignment(druid::widget::CrossAxisAlignment::Start);
@@ -113,14 +113,14 @@ pub fn parse(page: String) -> impl Widget<Book> {
     view_switcher
 }
 
-pub fn no_tag(s: &str, h: i32, font_size_offset: f64) -> Label<Book> {
+pub fn no_tag(s: &str, h: i32, font_size_offset: f64) -> Label<AppState> {
     if h > 0 {
         return h_label(s, h, font_size_offset);
     }
     default(s, font_size_offset)
 }
 
-pub fn emphasis(s: &str, h: i32, font_size_offset: f64) -> Label<Book> {
+pub fn emphasis(s: &str, h: i32, font_size_offset: f64) -> Label<AppState> {
     if h > 0 {
         return h_label_emphasis(s, h, font_size_offset);
     }
@@ -132,33 +132,33 @@ pub fn emphasis(s: &str, h: i32, font_size_offset: f64) -> Label<Book> {
     )
 }
 
-pub fn link(s: &str, h: i32, font_size_offset: f64, link: String) -> impl Widget<Book> {
+pub fn link(s: &str, h: i32, font_size_offset: f64, link: String) -> impl Widget<AppState> {
     let link_ref = Rc::new(link.clone());
     if h > 0 {
         return h_label_link(s, h, font_size_offset).on_click(move |_ctx, data, _env| {
-            data.navigate_to(link_ref.clone());
+            data.navigate_to_page(link_ref.clone());
         });
     }
     default_with_color(s, Color::AQUA, font_size_offset).on_click(move |_ctx, data, _env| {
-        data.navigate_to(link_ref.clone());
+        data.navigate_to_page(link_ref.clone());
     })
 }
 
-pub fn default(s: &str, font_size_offset: f64) -> Label<Book> {
+pub fn default(s: &str, font_size_offset: f64) -> Label<AppState> {
     Label::new(s).with_text_size(DEFAULT_FONT_SIZE + font_size_offset)
 }
 
-pub fn default_with_color(s: &str, color: Color, font_size_offset: f64) -> Label<Book> {
+pub fn default_with_color(s: &str, color: Color, font_size_offset: f64) -> Label<AppState> {
     Label::new(s)
         .with_text_color(color)
         .with_text_size(DEFAULT_FONT_SIZE + font_size_offset)
 }
 
-pub fn default_with_descriptor(s: &str, descr: FontDescriptor) -> Label<Book> {
+pub fn default_with_descriptor(s: &str, descr: FontDescriptor) -> Label<AppState> {
     Label::new(s).with_font(descr)
 }
 
-pub fn h_label(s: &str, h: i32, font_size_offset: f64) -> Label<Book> {
+pub fn h_label(s: &str, h: i32, font_size_offset: f64) -> Label<AppState> {
     Label::new(s).with_font(
         FontDescriptor::new(FontFamily::SANS_SERIF)
             .with_size(h_font_size(h) + font_size_offset)
@@ -166,7 +166,7 @@ pub fn h_label(s: &str, h: i32, font_size_offset: f64) -> Label<Book> {
     )
 }
 
-pub fn h_label_emphasis(s: &str, h: i32, font_size_offset: f64) -> Label<Book> {
+pub fn h_label_emphasis(s: &str, h: i32, font_size_offset: f64) -> Label<AppState> {
     Label::new(s).with_font(
         FontDescriptor::new(FontFamily::SYSTEM_UI)
             .with_size(h_font_size(h) + font_size_offset)
@@ -175,7 +175,7 @@ pub fn h_label_emphasis(s: &str, h: i32, font_size_offset: f64) -> Label<Book> {
     )
 }
 
-pub fn h_label_link(s: &str, h: i32, font_size_offset: f64) -> Label<Book> {
+pub fn h_label_link(s: &str, h: i32, font_size_offset: f64) -> Label<AppState> {
     Label::new(s)
         .with_text_color(Color::AQUA)
         .with_text_size(h_font_size(h) + font_size_offset)
