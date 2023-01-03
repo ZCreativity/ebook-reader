@@ -13,9 +13,18 @@ use druid::{
     Color, Command, Data, EventCtx, RenderContext, Target, Widget, WidgetExt,
 };
 
-// main page and contains list view of contacts
-// notice that this must return Box<dyn Widget<YourState>> instead of impl Widget<YourState>
-// navigator needs Boxed widgets in order to store the widgets
+/**
+ * Main page and contains list view of books
+ * notice that this must return Box<dyn Widget<YourState>> instead of impl Widget<YourState>
+ * navigator needs Boxed widgets in order to store the widgets.
+ *
+ * Widgets take the AppState as their data type, which holds a tuple of
+ * (Arc<Vec<UiView>>, Book, Option<usize>, usize)
+ * data.0 -> Current View
+ * data.1 -> Book
+ * data.2 -> Selected book index (or None)
+ * data.3 -> Index of the book
+ */
 pub fn library() -> Box<dyn Widget<AppState>> {
     // Book list
     let list = List::new(|| {
@@ -53,6 +62,11 @@ pub fn library() -> Box<dyn Widget<AppState>> {
         let details = Flex::column().with_child(book_title).with_child(email_text);
         let layout = Flex::row().with_child(cover).with_child(details);
 
+        // Open book on click
+        // 1. Make the view arc mutable
+        // 2. Add the BookRead view to the views (this will trigger the view switcher)
+        // 3. Set the selected book (index) to the current book (index)
+        // 4. Send the command to open the book with the index as payload
         let layout = layout.on_click(|event, data, _env| {
             let new_views = Arc::make_mut(&mut data.0);
             new_views.push(UiView::BookRead);

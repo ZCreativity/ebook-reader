@@ -100,4 +100,28 @@ impl AppState {
             }
         }
     }
+
+    pub fn get_current_book(&self) -> Option<Arc<&Book>> {
+        if self.selected.is_none() {
+            return None;
+        }
+        let index = self.selected.unwrap();
+        let book = self.library.get(index);
+        match book {
+            None => None,
+            Some(book) => Some(Arc::new(book)),
+        }
+    }
+
+    // pub fn get_current_book_mut(&mut self) -> Option<Arc<&mut Book>> {
+    //     if self.selected.is_none() {
+    //         return None;
+    //     }
+    //     let index = self.selected.unwrap();
+    //     let book = self.library.get_mut(index);
+    //     match book {
+    //         None => None,
+    //         Some(book) => Some(Arc::new(book)),
+    //     }
+    // }
 }
