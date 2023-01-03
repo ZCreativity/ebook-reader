@@ -33,11 +33,12 @@ pub fn library() -> Box<dyn Widget<AppState>> {
 
         // Book cover
         let cover = Flex::row().with_child(ViewSwitcher::new(
-            |data: &Book, _env| data.get_image_buf().is_some(),
+            |(_views, book, _selected, _idx): &(Arc<Vec<UiView>>, Book, Option<usize>, usize),
+             _env| book.get_image_buf().is_some(),
             move |f, data, _env| {
                 if *f {
                     Box::new(
-                        Image::new(data.get_image_buf().as_ref().unwrap().as_ref().clone())
+                        Image::new(data.1.get_image_buf().as_ref().unwrap().as_ref().clone())
                             .fix_size(100.0, 200.0),
                     )
                 } else {
@@ -50,7 +51,7 @@ pub fn library() -> Box<dyn Widget<AppState>> {
 
         // Layout of single book
         let details = Flex::column().with_child(book_title).with_child(email_text);
-        let layout = Flex::row().with_child(details);
+        let layout = Flex::row().with_child(cover).with_child(details);
 
         let layout = layout.on_click(|event, data, _env| {
             let new_views = Arc::make_mut(&mut data.0);
