@@ -1,5 +1,6 @@
 use druid::{Data, ImageBuf, Lens};
 use epub::doc::EpubDoc;
+use std::fmt::Debug;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::PathBuf;
@@ -78,6 +79,10 @@ impl Book {
 
     pub fn get_title(&self) -> String {
         self.title.clone()
+    }
+
+    pub fn get_author(&self) -> String {
+        self.author.clone()
     }
 
     pub fn get_book_length(&self) -> usize {
@@ -185,5 +190,19 @@ impl Book {
 
     pub fn decrease_font_size(&mut self) {
         self.font_size_offset -= 2.0;
+    }
+}
+
+impl Debug for Book {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Book")
+            .field("title", &self.title)
+            .field("author", &self.author)
+            .field("cover", &self.cover)
+            .field("current_page_index", &self.current_page_index)
+            .field("font_size_offset", &self.font_size_offset)
+            .field("is_editing", &self.is_editing)
+            .field("current_editing_page", &self.current_editing_page)
+            .finish()
     }
 }

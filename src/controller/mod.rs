@@ -1,3 +1,2 @@
-pub mod app_delegate;
-pub mod doc_controller;
-pub mod parser;
+pub mod navigator;
+pub mod view;

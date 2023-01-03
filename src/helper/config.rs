@@ -4,51 +4,24 @@ use druid::{FontDescriptor, FontFamily, FontWeight};
 pub const DISPLAY_WIDTH: f64 = 1000.0;
 pub const DISPLAY_HEIGHT: f64 = 800.0;
 pub const APP_NAME: &str = "EBook Reader";
-pub const TITLE_SIZE: f64 = 24.0;
-//pub const AUTHOR_SIZE: f64 = 14.0;
-// const ALERT_SIZE: f64 = 32.0;
+// pub const AUTHOR_SIZE: f64 = 14.0;
 // pub const PADDING_SM: f64 = 8.0;
 // pub const PADDING_MD: f64 = 16.0;
 pub const PADDING_LG: f64 = 32.0;
 // pub const PADDING_XL: f64 = 64.0;
 
-/* Text Styles */
-
+/* Font Sizes */
 pub const DEFAULT_FONT_SIZE: f64 = 16.0;
+pub const TITLE_SIZE: f64 = 24.0;
+
+/* Text Styles */
 pub const TITLE: FontDescriptor = FontDescriptor::new(FontFamily::SERIF)
     .with_size(TITLE_SIZE)
     .with_weight(FontWeight::BOLD);
 
-/*pub const AUTHOR: FontDescriptor = FontDescriptor::new(FontFamily::SERIF)
-.with_size(AUTHOR_SIZE)
-.with_style(FontStyle::Italic);*/
-
-// pub const ALERT: FontDescriptor = FontDescriptor::new(FontFamily::SANS_SERIF)
-//     .with_size(ALERT_SIZE)
-//     .with_weight(FontWeight::BOLD);
-
-// From Google
-// h1 | 2em    | 32px
-// h2 | 1.5em  | 24px
-// h3 | 1.17em | 18.72px
-// h4 | 1em    | 16px
-// h5 | 0.83em | 13.28px
-// h6 | 0.67em | 10.72px
-
-// pub let h_sizes: HashMap<i32, f64> = HashMap::from([
-//     (1, 32_f64),
-//     (2, 24_f64),
-//     (3, 18.72_f64),
-//     (4, 16_f64),
-//     (5, 13.28_f64),
-//     (6, 10.72_f64),
-// ]);
-
 /* Data */
 pub const LIBRARY_PATH: &str = "./src/library";
 pub const COVERS_PATH: &str = "./src/library/covers/";
-
-/* Icons */
 
 /* Cover placeholder */
 pub const COVER_PLACEHOLDER: &str = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>

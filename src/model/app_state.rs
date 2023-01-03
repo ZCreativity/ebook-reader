@@ -1,45 +1,103 @@
-use super::book::Book;
-use crate::model::library::Library;
-use druid::{Data, Lens};
+use crate::helper::{
+    config::LIBRARY_PATH,
+    functions::{epub_to_book, open_native_dialog},
+};
 
-#[derive(Data, Clone, Lens)]
+use super::{book::Book, ui_view::UiView};
+use druid::{Data, Lens};
+use std::{
+    fs::{self, ReadDir},
+    sync::Arc,
+};
+
+#[derive(Clone, Data, Lens, Debug)]
 pub struct AppState {
-    library: Library,
-    is_reading_book: bool,
-    is_editing_page: bool,
-    opened_book: Book,
+    // this will act as the backing data for your navigation state
+    // this should always be initialized with one view and should
+    // ideally never be empty, otherwise things might not work correctly
+    pub nav_state: Arc<Vec<UiView>>,
+    pub library: Arc<Vec<Book>>,
+    pub selected: Option<usize>,
 }
 
 impl AppState {
     pub fn new() -> Self {
-        let empty_book = Book::new_empty();
+        let library = Self::initialize_library();
         Self {
-            library: Library::new(),
-            is_reading_book: false,
-            opened_book: empty_book,
-            is_editing_page: false,
+            library: Arc::new(library),
+            nav_state: Arc::new(vec![UiView::Library]),
+            selected: None,
         }
     }
 
+    /**
+     * Initialize library, scan the "library" folder and add all the books
+     */
+    fn initialize_library() -> Vec<Book> {
+        // Scan through library folder and init books
+        let dir = fs::read_dir(LIBRARY_PATH);
+        let dir: Option<ReadDir> = match dir {
+            Ok(dir) => Some(dir),
+            Err(e) => {
+                println!("Error: {:?}", e);
+                None
+            }
+        };
+
+        // Book list
+        let mut book_list: Vec<Book> = Vec::new();
+        if dir.is_some() {
+            for file in dir.unwrap() {
+                let book = epub_to_book(file.as_ref().unwrap().path());
+                match book {
+                    None => {
+                        eprintln!("Unable to add book {}", file.unwrap().path().display());
+                    }
+                    Some(book) => {
+                        book_list.push(book);
+                    }
+                }
+            }
+            return book_list;
+        }
+
+        // No files found
+        Vec::new()
+    }
+
+    /**
+     * Adds new book to the library
+     */
     pub fn add_book(&mut self) {
-        self.library.add_book();
-    }
+        let path = open_native_dialog();
+        let path = match path {
+            None => {
+                println!("No book selected");
+                return;
+            }
+            Some(path) => path,
+        };
 
-    pub fn open_book(&mut self, book: Book) {
-        self.opened_book = book;
-        self.is_reading_book = true;
-    }
-
-    pub fn edit_page(&mut self) {
-        self.is_editing_page = true;
-        self.opened_book.set_editing_book(true);
-    }
-
-    pub fn close_book(&mut self) {
-        self.is_reading_book = false;
-    }
-
-    pub fn get_is_reading_book(&self) -> bool {
-        self.is_reading_book
+        let book = epub_to_book(path.clone());
+        let filename = path.file_name().unwrap().to_str().unwrap().to_string();
+        let to = format!("{}/{}", LIBRARY_PATH, filename);
+        let result = fs::copy(path, to);
+        match result {
+            Ok(_) => {
+                match book {
+                    None => {
+                        eprintln!("Unable to generate ebook for this file")
+                    }
+                    Some(book) => {
+                        let library = Arc::make_mut(&mut self.library);
+                        library.push(book);
+                    }
+                }
+                println!("Book added successfully")
+            }
+            Err(e) => {
+                eprintln!("Error adding the book: {}", e)
+            }
+        }
     }
 }

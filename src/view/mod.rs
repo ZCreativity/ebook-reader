@@ -1,3 +1,4 @@
-pub mod book;
-pub mod home;
-pub mod editor;
+pub mod contact_detail;
+pub mod contact_edit;
+pub mod library;
+pub mod navigator;
