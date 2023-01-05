@@ -8,9 +8,10 @@ use crate::{
 };
 use druid::{
     widget::{
-        Button, Container, CrossAxisAlignment, Flex, Label, MainAxisAlignment, Scope, TextBox,
+        Button, Container, CrossAxisAlignment, Flex, Label, MainAxisAlignment, Scope, Scroll,
+        TextBox,
     },
-    Color, Widget, WidgetExt,
+    Widget, WidgetExt,
 };
 use druid_widget_nursery::navigator::ViewController;
 
@@ -22,10 +23,14 @@ pub fn book_edit() -> Box<dyn Widget<AppState>> {
     let name_input = Flex::column()
         .with_child(Label::new("Title"))
         .with_child(
-            TextBox::new()
-                .with_text_size(20.)
-                .fix_width(300.)
-                .lens(Book::title),
+            Scroll::new(
+                TextBox::multiline()
+                    .with_text_size(20.)
+                    .expand_width()
+                    .lens(Book::current_page_str),
+            )
+            .vertical()
+            .fix_height(500.0),
         )
         .cross_axis_alignment(CrossAxisAlignment::Start);
 
@@ -57,7 +62,7 @@ pub fn book_edit() -> Box<dyn Widget<AppState>> {
         .with_flex_child(layout, 1.0)
         .main_axis_alignment(MainAxisAlignment::SpaceAround);
 
-    let container = Container::new(layout).background(Color::WHITE);
+    let container = Container::new(layout);
 
     Box::new(container)
 }

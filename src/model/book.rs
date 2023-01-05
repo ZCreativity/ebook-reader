@@ -18,7 +18,7 @@ pub struct Book {
     current_page_index: usize,
     font_size_offset: f64,
     is_editing: bool,
-    current_editing_page: String,
+    current_page_str: String,
 }
 
 impl Book {
@@ -52,7 +52,7 @@ impl Book {
             current_page_index: 1,
             font_size_offset: 0.0,
             is_editing: false,
-            current_editing_page: String::new(),
+            current_page_str: String::new(),
         }
     }
 
@@ -65,7 +65,7 @@ impl Book {
             current_page_index: 0,
             font_size_offset: 0.0,
             is_editing: false,
-            current_editing_page: String::new(),
+            current_page_str: String::new(),
         }
     }
 
@@ -121,22 +121,9 @@ impl Book {
         self.current_page_index = page_index;
     }
 
-    // pub fn is_editing_book(&self) -> bool {
-    //     self.is_editing
-    // }
-
-    // pub fn set_editing_book(&mut self, is_editing: bool) {
-    //     self.set_editing_page(self.get_page_str(self.get_current_page()).unwrap());
-    //     self.is_editing = is_editing;
-    // }
-
-    // pub fn set_editing_page(&mut self, page: String) {
-    //     self.current_editing_page = page;
-    // }
-
-    // pub fn get_editing_page(&self) -> String {
-    //     self.current_editing_page.clone()
-    // }
+    pub fn set_page_str(&mut self, page_str: String) {
+        self.current_page_str = page_str;
+    }
 
     /**
      * doc.resources
@@ -190,7 +177,7 @@ impl Debug for Book {
             .field("current_page_index", &self.current_page_index)
             .field("font_size_offset", &self.font_size_offset)
             .field("is_editing", &self.is_editing)
-            .field("current_editing_page", &self.current_editing_page)
+            .field("current_page_str", &self.current_page_str)
             .finish()
     }
 }

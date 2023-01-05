@@ -17,15 +17,6 @@ use crate::{
 
 // details views - this is the second view after clicking on a contact
 pub fn book_view() -> Box<dyn Widget<AppState>> {
-    // let name = Label::dynamic(|data: &AppState, _env: &Env| {
-    //     if let Some(idx) = data.selected {
-    //         format!("Book: {}", data.library[idx].get_title())
-    //     } else {
-    //         "".to_string()
-    //     }
-    // })
-    // .with_text_size(20.);
-
     let book_menu = book_menu();
     let book_page_counter = book_page_counter();
     let book_controls = book_controls();
@@ -67,6 +58,7 @@ fn book_menu() -> impl Widget<AppState> {
         let views = Arc::make_mut(&mut data.nav_state);
         views.push(UiView::BookEdit);
         data.nav_state = Arc::new(views.to_owned());
+        data.set_editing_page();
         event.submit_command(Command::new(
             BOOK_EDIT,
             data.get_selected().unwrap(),

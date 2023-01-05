@@ -199,4 +199,23 @@ impl AppState {
         let book = library.get_mut(self.selected.unwrap()).unwrap();
         book.prev_page();
     }
+
+    pub fn set_editing_page(&mut self) {
+        if self.selected.is_none() {
+            return;
+        }
+        // Call the set_editing_page method of the selected book
+        let library = Arc::make_mut(&mut self.library);
+        let book = library.get_mut(self.selected.unwrap()).unwrap();
+        let page_string = book.get_page_str(book.get_current_page());
+        match page_string {
+            None => {
+                println!("Error getting page string");
+                return;
+            }
+            Some(page) => {
+                book.set_page_str(page);
+            }
+        }
+    }
 }
