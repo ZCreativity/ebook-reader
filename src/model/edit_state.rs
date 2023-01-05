@@ -1,6 +1,8 @@
-use std::sync::Arc;
+use std::{io::Write, sync::Arc};
 
 use druid::{widget::ScopeTransfer, Data, Lens};
+
+use crate::helper::config::LIBRARY_PATH;
 
 use super::{app_state::AppState, book::Book};
 
@@ -55,9 +57,19 @@ impl ScopeTransfer for EditTransfer {
             books[state.index] = state.book.clone();
             inner.library = Arc::new(books.to_owned());
 
-            println!("Library: {:?}", inner.library)
+            println!("Library: {:?}", inner.library);
 
-            // TODO: Update the selected book html file
+            // Update the selected book html file with the changes made in the edit page
+            let page_to_update = state.book.get_current_page_str();
+            let file_to_update = state.book.get_current_doc_path();
+            match file_to_update {
+                None => {
+                    eprintln!("Unable to update file");
+                }
+                Some(file) => {
+                    // TODO: Copy file, rename and update here
+                }
+            }
         }
     }
 }

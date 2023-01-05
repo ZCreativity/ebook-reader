@@ -115,6 +115,10 @@ impl Book {
         self.current_page_index = page_index;
     }
 
+    pub fn get_current_page_str(&self) -> String {
+        self.current_page_str.clone()
+    }
+
     pub fn set_page_str(&mut self, page_str: String) {
         self.current_page_str = page_str;
     }
@@ -146,6 +150,22 @@ impl Book {
             }
             None => {
                 eprintln!("Error navigating to link: {}", link);
+            }
+        }
+    }
+
+    /**
+     * Get the current doc path
+     * Example: OEBPS/chapter_001.xhtml (relative path to the epub file)
+     */
+    pub fn get_current_doc_path(&self) -> Option<PathBuf> {
+        let doc = self.get_doc().unwrap();
+        let doc = doc.lock().unwrap();
+        match doc.get_current_path() {
+            Ok(path) => Some(path),
+            Err(e) => {
+                eprintln!("Error getting current doc path: {}", e);
+                None
             }
         }
     }
