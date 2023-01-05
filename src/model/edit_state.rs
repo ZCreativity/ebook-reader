@@ -47,10 +47,15 @@ impl ScopeTransfer for EditTransfer {
 
     fn write_back_input(&self, state: &Self::State, inner: &mut Self::In) {
         if state.was_saved {
-            // Update the library with the edited book, to reflect the changes instantly
-            let contacts = Arc::make_mut(&mut inner.library);
-            contacts[state.index] = state.book.clone();
-            inner.library = Arc::new(contacts.to_owned());
+            // Here the current_page_str of the book is updated with changes made in the edit page
+            println!("Saving book: {:?}", state.book);
+
+            // TODO: Update the library with the edited book, to reflect the changes instantly (Doesn't work yet)
+            let books = Arc::make_mut(&mut inner.library);
+            books[state.index] = state.book.clone();
+            inner.library = Arc::new(books.to_owned());
+
+            println!("Library: {:?}", inner.library)
 
             // TODO: Update the selected book html file
         }

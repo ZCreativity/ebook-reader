@@ -16,8 +16,6 @@ pub struct Book {
     cover: Option<Arc<ImageBuf>>,
     doc: Option<Arc<Mutex<EpubDoc<BufReader<File>>>>>,
     current_page_index: usize,
-    font_size_offset: f64,
-    is_editing: bool,
     current_page_str: String,
 }
 
@@ -50,8 +48,6 @@ impl Book {
             author,
             cover,
             current_page_index: 1,
-            font_size_offset: 0.0,
-            is_editing: false,
             current_page_str: String::new(),
         }
     }
@@ -63,8 +59,6 @@ impl Book {
             author: String::new(),
             cover: None,
             current_page_index: 0,
-            font_size_offset: 0.0,
-            is_editing: false,
             current_page_str: String::new(),
         }
     }
@@ -175,8 +169,6 @@ impl Debug for Book {
             .field("author", &self.author)
             .field("cover", &self.cover)
             .field("current_page_index", &self.current_page_index)
-            .field("font_size_offset", &self.font_size_offset)
-            .field("is_editing", &self.is_editing)
             .field("current_page_str", &self.current_page_str)
             .finish()
     }
