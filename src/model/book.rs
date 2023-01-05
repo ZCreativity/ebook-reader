@@ -17,7 +17,9 @@ pub struct Book {
     doc: Option<Arc<Mutex<EpubDoc<BufReader<File>>>>>,
     current_page_index: usize,
     current_page_str: String,
+    file_path: String,
 }
+
 
 impl Book {
     pub fn new(
@@ -25,6 +27,7 @@ impl Book {
         title: String,
         author: String,
         cover_path: String,
+        file_path: String,
     ) -> Self {
         // Extract cover image from cover_path
         let cover = if cover_path.is_empty() {
@@ -49,6 +52,7 @@ impl Book {
             cover,
             current_page_index: 1,
             current_page_str: String::new(),
+            file_path
         }
     }
 
@@ -60,6 +64,7 @@ impl Book {
             cover: None,
             current_page_index: 0,
             current_page_str: String::new(),
+            file_path: String::new(),
         }
     }
 
@@ -121,6 +126,10 @@ impl Book {
 
     pub fn set_page_str(&mut self, page_str: String) {
         self.current_page_str = page_str;
+    }
+
+    pub fn get_file_path(&self) -> String {
+        self.file_path.clone()
     }
 
     /**

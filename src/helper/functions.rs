@@ -6,7 +6,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::{helper::config::COVERS_PATH, model::book::Book};
+use crate::{helper::config::{COVERS_PATH, LIBRARY_PATH}, model::book::Book};
 
 /**
  * Open a file dialog and return the path to the selected file.
@@ -35,6 +35,10 @@ pub fn path_to_bytes(path: PathBuf) -> Option<Vec<u8>> {
 Converts an .epub file into the Book struct
  */
 pub fn epub_to_book(path: PathBuf) -> Option<Book> {
+    
+    let filename = path.file_name().unwrap().to_str().unwrap().to_string();
+    let file_path = format!("{}/{}", LIBRARY_PATH, filename);
+
     let doc = EpubDoc::new(path);
     let mut doc = match doc {
         Ok(doc) => doc,
@@ -81,7 +85,7 @@ pub fn epub_to_book(path: PathBuf) -> Option<Book> {
     };
 
     match cover_path {
-        None => Some(Book::new(doc, title, author, String::new())),
-        Some(cover_path) => Some(Book::new(doc, title, author, cover_path)),
+        None => Some(Book::new(doc, title, author, String::new(), file_path)),
+        Some(cover_path) => Some(Book::new(doc, title, author, cover_path, file_path)),
     }
 }

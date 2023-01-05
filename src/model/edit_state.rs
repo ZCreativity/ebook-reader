@@ -79,9 +79,8 @@ impl ScopeTransfer for EditTransfer {
                         .expect("Error while retrieving file path");
                     let dir_file_path = [dir_path,file_path].join("/");
                     
-
-                    let epub_path = "src/library/hope-prisoner-of-zenda.epub";
-                    let new_epub_path = "src/library/hope-prisoner-of-zenda-copy.epub";
+                    let epub_path = state.book.get_file_path();
+                    let new_epub_path = epub_path.replace(".epub", "-copy.epub");
 
                     //Converting epub into zip
                     fs::copy(epub_path, zip_path)
