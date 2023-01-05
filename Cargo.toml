@@ -9,6 +9,9 @@ native-dialog = "0.6.3"
 epub = "1.2.4"
 html2text = "0.4.4"
 druid-widget-nursery = { git = "https://github.com/linebender/druid-widget-nursery" }
+zip = "0.6.3"
+zip-extensions = "0.6.1"
+
 
 
 [dependencies.druid]

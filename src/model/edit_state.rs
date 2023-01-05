@@ -1,10 +1,10 @@
-use std::{io::Write, sync::Arc};
-
+use std::{sync::Arc, path::PathBuf, ffi::OsString};
 use druid::{widget::ScopeTransfer, Data, Lens};
-
 use crate::helper::config::LIBRARY_PATH;
-
 use super::{app_state::AppState, book::Book};
+
+use zip::{ZipArchive};
+use std::{fs::{File, self}, io::Write};
 
 // this holds state that will be used when on the edit page
 #[derive(Clone, Data, Lens, Debug)]
@@ -68,6 +68,58 @@ impl ScopeTransfer for EditTransfer {
                 }
                 Some(file) => {
                     // TODO: Copy file, rename and update here
+                    
+                    let zip_path = "src/library/copy.zip";
+                    let new_zip_path = "src/library/new.zip";
+                    let dir_path = "src/library/new";
+                    let edited_html = page_to_update.as_str();
+
+                    let path_buf = file.to_path_buf();
+                    let file_path = path_buf.as_os_str().to_str()
+                        .expect("Error while retrieving file path");
+                    let dir_file_path = [dir_path,file_path].join("/");
+                    
+
+                    let epub_path = "src/library/hope-prisoner-of-zenda.epub";
+                    let new_epub_path = "src/library/hope-prisoner-of-zenda-copy.epub";
+
+                    //Converting epub into zip
+                    fs::copy(epub_path, zip_path)
+                        .expect("Error encountered while copying file!");
+            
+                    let zip_file = File::options().write(true).read(true).open(zip_path).unwrap();
+
+                    //Extract the zip 
+                    let mut archive = ZipArchive::new(zip_file).unwrap();
+                    archive.extract(dir_path)
+                        .expect("Error encountered while extracting zip files");
+                    
+                    //Replace old file with the edit one
+                    let mut edited_file =  File::create(dir_file_path.as_str())
+                        .expect("Error encountered while editing old file!");
+                    edited_file.write_all(edited_html.as_bytes())
+                        .expect("Error encountered while editing old file!");
+
+                    
+                    
+                    //Converting directory into zip
+                    let new_zip_path_buf = PathBuf::from(OsString::from(new_zip_path));
+                    let dir_path_buf = PathBuf::from(OsString::from(dir_path));
+                    zip_extensions::write::zip_create_from_directory(&new_zip_path_buf, &dir_path_buf)
+                        .expect("Error while zipping the directory");
+
+                    //Converting zip into epub
+                    fs::copy(new_zip_path, new_epub_path)
+                        .expect("Error encountered while copying file!");
+
+                    //Delete unnecesesary file
+                    fs::remove_file(zip_path)
+                        .expect("Error while deleting old zip");
+                    fs::remove_file(new_zip_path)
+                        .expect("Error while deleting new zip");
+                    fs::remove_dir_all(dir_path)
+                        .expect("Error encountered while deleting directory");
+                    
                 }
             }
         }
