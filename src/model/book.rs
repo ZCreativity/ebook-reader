@@ -56,18 +56,18 @@ impl Book {
         }
     }
 
-    // pub fn new_empty() -> Self {
-    //     Self {
-    //         doc: None,
-    //         title: String::new(),
-    //         author: String::new(),
-    //         cover: None,
-    //         current_page_index: 0,
-    //         font_size_offset: 0.0,
-    //         is_editing: false,
-    //         current_editing_page: String::new(),
-    //     }
-    // }
+    pub fn new_empty() -> Self {
+        Self {
+            doc: None,
+            title: String::new(),
+            author: String::new(),
+            cover: None,
+            current_page_index: 0,
+            font_size_offset: 0.0,
+            is_editing: false,
+            current_editing_page: String::new(),
+        }
+    }
 
     pub fn get_image_buf(&self) -> Option<Arc<ImageBuf>> {
         self.cover.as_ref().cloned()

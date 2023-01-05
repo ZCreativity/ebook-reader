@@ -111,6 +111,13 @@ impl AppState {
         self.library.clone()
     }
 
+    // /**
+    //  * Set the library (when editing a book, then save to file)
+    //  */
+    // pub fn set_library(&mut self, library: Arc<Vec<Book>>) {
+    //     self.library = library;
+    // }
+
     /**
      * Get reference to the selected book
      */
