@@ -18,6 +18,7 @@ impl Controller<AppState, Navigator<AppState, UiView>> for NavigatorController {
     ) {
         match event {
             Event::Command(selector) if selector.is(POP_VIEW) => {
+                ctx.request_update();
                 data.pop_view();
             }
             _ => (),
