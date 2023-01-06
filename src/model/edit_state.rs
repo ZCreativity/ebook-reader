@@ -67,7 +67,6 @@ impl ScopeTransfer for EditTransfer {
                     eprintln!("Unable to update file");
                 }
                 Some(file) => {
-                    // TODO: Copy file, rename and update here
                     
                     let zip_path = "src/library/copy.zip";
                     let new_zip_path = "src/library/new.zip";
@@ -80,7 +79,7 @@ impl ScopeTransfer for EditTransfer {
                     let dir_file_path = [dir_path,file_path].join("/");
                     
                     let epub_path = state.book.get_file_path();
-                    let new_epub_path = epub_path.replace(".epub", "-copy.epub");
+                    let new_epub_path = epub_path.replace(".epub", "-edit.epub");
 
                     //Converting epub into zip
                     fs::copy(epub_path, zip_path)
@@ -99,7 +98,17 @@ impl ScopeTransfer for EditTransfer {
                     edited_file.write_all(edited_html.as_bytes())
                         .expect("Error encountered while editing old file!");
 
+                    //Replace the title
                     
+                    
+                    let dir_metadata_path = [dir_path,"OEBPS/package.opf"].join("/");
+                    let edited_metadata_string = fs::read_to_string(dir_metadata_path.as_str())
+                        .expect("Error encountered while reading metadata file!");
+                    
+                    let mut metadata_file = File::create(dir_metadata_path.as_str())
+                        .expect("Error encountered while editing metadata file!");
+                    metadata_file.write_all(edited_metadata_string.replace("</dc:title>",  " (edit)</dc:title>").as_bytes())
+                        .expect("Error encountered while editing metafile");
                     
                     //Converting directory into zip
                     let new_zip_path_buf = PathBuf::from(OsString::from(new_zip_path));
