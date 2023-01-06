@@ -1,5 +1,6 @@
 use druid::{Data, ImageBuf, Lens};
 use epub::doc::EpubDoc;
+use std::fmt::Debug;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::PathBuf;
@@ -15,8 +16,10 @@ pub struct Book {
     cover: Option<Arc<ImageBuf>>,
     doc: Option<Arc<Mutex<EpubDoc<BufReader<File>>>>>,
     current_page_index: usize,
-    font_size_offset: f64,
+    current_page_str: String,
+    file_path: String,
 }
+
 
 impl Book {
     pub fn new(
@@ -24,6 +27,7 @@ impl Book {
         title: String,
         author: String,
         cover_path: String,
+        file_path: String,
     ) -> Self {
         // Extract cover image from cover_path
         let cover = if cover_path.is_empty() {
@@ -47,7 +51,8 @@ impl Book {
             author,
             cover,
             current_page_index: 1,
-            font_size_offset: 0.0,
+            current_page_str: String::new(),
+            file_path
         }
     }
 
@@ -58,7 +63,8 @@ impl Book {
             author: String::new(),
             cover: None,
             current_page_index: 0,
-            font_size_offset: 0.0,
+            current_page_str: String::new(),
+            file_path: String::new(),
         }
     }
 
@@ -74,6 +80,10 @@ impl Book {
         self.title.clone()
     }
 
+    pub fn get_author(&self) -> String {
+        self.author.clone()
+    }
+
     pub fn get_book_length(&self) -> usize {
         match &self.doc {
             Some(doc) => doc.lock().unwrap().spine.len(),
@@ -86,7 +96,7 @@ impl Book {
     }
 
     pub fn has_next_page(&self) -> bool {
-        self.current_page_index < self.get_book_length()
+        self.current_page_index < self.get_book_length() - 1
     }
 
     pub fn has_prev_page(&self) -> bool {
@@ -108,6 +118,18 @@ impl Book {
     pub fn set_page(&mut self, page_index: usize) {
         println!("Setting page to: {}", page_index);
         self.current_page_index = page_index;
+    }
+
+    pub fn get_current_page_str(&self) -> String {
+        self.current_page_str.clone()
+    }
+
+    pub fn set_page_str(&mut self, page_str: String) {
+        self.current_page_str = page_str;
+    }
+
+    pub fn get_file_path(&self) -> String {
+        self.file_path.clone()
     }
 
     /**
@@ -141,6 +163,22 @@ impl Book {
         }
     }
 
+    /**
+     * Get the current doc path
+     * Example: OEBPS/chapter_001.xhtml (relative path to the epub file)
+     */
+    pub fn get_current_doc_path(&self) -> Option<PathBuf> {
+        let doc = self.get_doc().unwrap();
+        let doc = doc.lock().unwrap();
+        match doc.get_current_path() {
+            Ok(path) => Some(path),
+            Err(e) => {
+                eprintln!("Error getting current doc path: {}", e);
+                None
+            }
+        }
+    }
+
     pub fn get_page_str(&self, page_index: usize) -> Option<String> {
         if page_index > 0 && page_index <= self.get_book_length() {
             let doc = self.get_doc().unwrap();
@@ -151,16 +189,16 @@ impl Book {
             None
         }
     }
+}
 
-    pub fn get_font_size_offset(&self) -> f64 {
-        self.font_size_offset
-    }
-
-    pub fn increase_font_size(&mut self) {
-        self.font_size_offset += 2.0;
-    }
-
-    pub fn decrease_font_size(&mut self) {
-        self.font_size_offset -= 2.0;
+impl Debug for Book {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Book")
+            .field("title", &self.title)
+            .field("author", &self.author)
+            .field("cover", &self.cover)
+            .field("current_page_index", &self.current_page_index)
+            .field("current_page_str", &self.current_page_str)
+            .finish()
     }
 }
