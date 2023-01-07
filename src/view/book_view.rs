@@ -31,7 +31,7 @@ pub fn book_view() -> Box<dyn Widget<AppState>> {
 
     let book_text = Scroll::new(book_page)
         .vertical()
-        .fix_height(600.0)
+        .fix_height(400.0)
         .fix_width(700.0);
 
     let bottom_bar = Flex::row()
@@ -52,6 +52,10 @@ pub fn book_view() -> Box<dyn Widget<AppState>> {
 fn book_menu() -> impl Widget<AppState> {
     let back_button = Button::new("Back").on_click(|_event, data: &mut AppState, _env| {
         data.pop_view();
+    });
+
+    let index_button = Button::new("Go to index").on_click( |_event,data: &mut AppState, _env|{
+        data.navigate_to_index();
     });
 
     let edit_button = Button::new("Edit").on_click(|event, data: &mut AppState, _env| {
@@ -78,6 +82,7 @@ fn book_menu() -> impl Widget<AppState> {
 
     let flex = Flex::row()
         .with_child(back_button)
+        .with_child(index_button)
         .with_child(edit_button)
         .with_child(increase_font_button)
         .with_child(decrease_font_button)
