@@ -160,6 +160,16 @@ impl AppState {
         book.navigate_to(link);
     }
 
+    pub fn navigate_to_index(&mut self) {
+        if self.selected.is_none() {
+            return;
+        }
+        // Call the navigate_to method of the selected book
+        let library = Arc::make_mut(&mut self.library);
+        let book = library.get_mut(self.selected.unwrap()).unwrap();
+        book.navigate_to_index();
+    }
+
     pub fn has_next_page(&self) -> bool {
         if self.selected.is_none() {
             return false;

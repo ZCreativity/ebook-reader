@@ -163,6 +163,30 @@ impl Book {
         }
     }
 
+    pub fn navigate_to_index(&mut self) {
+        let binding = self.get_doc().unwrap();
+        let doc = binding.lock().unwrap();
+
+        let resource_id = doc
+            .resources
+            .iter()
+            .find(|(_, (path, _))| path.ends_with("OEBPS/bk01-toc.xhtml"))
+            .map(|(id, _)| id);
+
+        match resource_id {
+            Some(resource_id) => {
+                let page_index = doc.resource_id_to_chapter(resource_id);
+                println!(
+                    "Navigating to index"
+                );
+                self.set_page(page_index.unwrap_or(1))
+            }
+            None => {
+                eprintln!("Error navigating to index");
+            }
+        }
+    }
+
     /**
      * Get the current doc path
      * Example: OEBPS/chapter_001.xhtml (relative path to the epub file)
