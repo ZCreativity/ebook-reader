@@ -1,6 +1,6 @@
 use crate::helper::{
     config::{DEFAULT_FONT_SIZE, LIBRARY_PATH},
-    functions::{epub_to_book, open_native_dialog},
+    functions::{epub_to_book, open_native_dialog, open_native_dialog_images},
 };
 
 use super::{book::Book, ui_view::UiView};
@@ -243,6 +243,19 @@ impl AppState {
             }
             Some(page) => {
                 book.set_page_str(page);
+            }
+        }
+    }
+
+    //** OCR */
+    pub fn ocr_from_file(&self) {
+        let selected_file = open_native_dialog_images();
+        match selected_file {
+            Some(file) => {
+                println!("Selected file: {:?}", file);
+            }
+            None => {
+                eprintln!("No file selected")
             }
         }
     }

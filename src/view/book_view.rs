@@ -18,13 +18,13 @@ use crate::{
 // details views - this is the second view after clicking on a contact
 pub fn book_view() -> Box<dyn Widget<AppState>> {
     let book_menu = book_menu();
-    let book_page_counter = book_page_counter();
+    let top_right_buttons = top_right();
     let book_controls = book_controls();
     let book_page = book_page();
 
     let top_bar = Flex::row()
         .with_child(book_menu)
-        .with_child(book_page_counter)
+        .with_child(top_right_buttons)
         .main_axis_alignment(MainAxisAlignment::SpaceBetween)
         .cross_axis_alignment(CrossAxisAlignment::Start)
         .must_fill_main_axis(true);
@@ -54,7 +54,7 @@ fn book_menu() -> impl Widget<AppState> {
         data.pop_view();
     });
 
-    let index_button = Button::new("Go to index").on_click( |_event,data: &mut AppState, _env|{
+    let index_button = Button::new("Go to index").on_click(|_event, data: &mut AppState, _env| {
         data.navigate_to_index();
     });
 
@@ -93,7 +93,7 @@ fn book_menu() -> impl Widget<AppState> {
     flex
 }
 
-fn book_page_counter() -> impl Widget<AppState> {
+fn top_right() -> impl Widget<AppState> {
     let page_counter = Label::dynamic(|data: &AppState, _env: &Env| {
         if let Some(idx) = data.get_selected() {
             format!(
@@ -106,7 +106,12 @@ fn book_page_counter() -> impl Widget<AppState> {
         }
     });
 
-    page_counter
+    let ocr_button =
+        Button::new("Search from photo").on_click(|_ctx, data: &mut AppState, _env| {
+            data.ocr_from_file();
+        });
+
+    Flex::row().with_child(ocr_button).with_child(page_counter)
 }
 
 fn book_controls() -> impl Widget<AppState> {

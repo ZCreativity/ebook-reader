@@ -6,7 +6,10 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::{helper::config::{COVERS_PATH, LIBRARY_PATH}, model::book::Book};
+use crate::{
+    helper::config::{COVERS_PATH, LIBRARY_PATH},
+    model::book::Book,
+};
 
 /**
  * Open a file dialog and return the path to the selected file.
@@ -15,6 +18,15 @@ pub fn open_native_dialog() -> Option<PathBuf> {
     let path = FileDialog::new()
         .set_location("~/Desktop")
         .add_filter("EPub", &["epub"])
+        .show_open_single_file()
+        .unwrap();
+    path
+}
+
+pub fn open_native_dialog_images() -> Option<PathBuf> {
+    let path = FileDialog::new()
+        .set_location("~/Desktop")
+        .add_filter("Image", &["png", "jpg", "jpeg"])
         .show_open_single_file()
         .unwrap();
     path
@@ -35,7 +47,6 @@ pub fn path_to_bytes(path: PathBuf) -> Option<Vec<u8>> {
 Converts an .epub file into the Book struct
  */
 pub fn epub_to_book(path: PathBuf) -> Option<Book> {
-    
     let filename = path.file_name().unwrap().to_str().unwrap().to_string();
     let file_path = format!("{}/{}", LIBRARY_PATH, filename);
 
