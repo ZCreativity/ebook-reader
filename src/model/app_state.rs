@@ -5,9 +5,10 @@ use crate::helper::{
 
 use super::{book::Book, ui_view::UiView};
 use druid::{Data, Lens};
+use image::{imageops, ImageFormat};
 use std::{
     fs::{self, ReadDir},
-    path::PathBuf,
+    path::{Path, PathBuf},
     rc::Rc,
     sync::Arc,
 };
@@ -253,6 +254,17 @@ impl AppState {
         match selected_file {
             Some(file) => {
                 println!("Selected file: {:?}", file);
+                let file_path = Path::new(file.to_str().unwrap());
+
+                // Open an image with the "image" create and convert it to grayscale
+                let img = image::open(file_path).unwrap().grayscale();
+
+                // Initialize a new Tesseract instance, and set the image
+                let mut ocr = tesseract::Tesseract::new(None, Some("eng")).unwrap();
+                ocr.set_image(file.as_os_str().to_str().unwrap()).unwrap();
+
+                // Extract text from image
+                let text = ocr.get_text().unwrap();
             }
             None => {
                 eprintln!("No file selected")
