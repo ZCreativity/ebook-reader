@@ -1,4 +1,5 @@
 /** EBOOK CREATION TESTS */
+#[allow(unused)]
 const TEST_FILE_PATH: &str = "./src/library/hope-prisoner-of-zenda.epub";
 
 /**
@@ -94,6 +95,23 @@ fn previous_page_of_book_loaded() {
             book.next_page();
             book.prev_page();
             assert_eq!(book.get_current_page(), 1);
+        }
+        None => {
+            panic!("Book not created")
+        }
+    }
+}
+
+/**
+ * Tests that the last page of a book is loaded
+ */
+#[test]
+fn last_page_of_book_loaded() {
+    let book = crate::helper::functions::epub_to_book(std::path::PathBuf::from(TEST_FILE_PATH));
+    match book {
+        Some(mut book) => {
+            book.set_page(book.get_book_length());
+            assert_eq!(book.get_current_page(), book.get_book_length());
         }
         None => {
             panic!("Book not created")
