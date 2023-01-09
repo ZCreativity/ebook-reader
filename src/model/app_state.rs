@@ -249,7 +249,7 @@ impl AppState {
     }
 
     //** OCR */
-    pub fn ocr_from_file(&self) {
+    pub fn ocr_from_file(&mut self) {
         let selected_file = open_native_dialog_images();
         match selected_file {
             Some(file) => {
@@ -260,8 +260,16 @@ impl AppState {
                     Ok(text) => {
                         println!("Text: {}", text);
                         let book = self.get_library()[self.get_selected().unwrap()].clone();
-                        let page = book.get_page_from_ocr_text(text);
+                        let page = book.get_page_from_ocr_text(text.trim().to_string());
                         println!("Page: {:?}", page);
+                        match page {
+                            Some(page) => {
+                                self.navigate_to_page_index(page);
+                            }
+                            None => {
+                                println!("No page found");
+                            }
+                        }
                     }
                     Err(err) => println!("Error {:?}", err),
                 }
@@ -270,5 +278,11 @@ impl AppState {
                 eprintln!("No file selected")
             }
         }
+    }
+
+    fn navigate_to_page_index(&mut self, page: usize) {
+        let library = Arc::make_mut(&mut self.library);
+        let book = library.get_mut(self.selected.unwrap()).unwrap();
+        book.set_page(page);
     }
 }
