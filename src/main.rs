@@ -6,6 +6,7 @@ use view::navigator::navigator;
 mod controller;
 mod helper;
 mod model;
+mod tests;
 mod view;
 
 fn main() {
