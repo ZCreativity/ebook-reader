@@ -82,3 +82,21 @@ fn next_page_of_book_loaded() {
         }
     }
 }
+
+/**
+ * Tests that the previous page of a book is loaded
+ */
+#[test]
+fn previous_page_of_book_loaded() {
+    let book = crate::helper::functions::epub_to_book(std::path::PathBuf::from(TEST_FILE_PATH));
+    match book {
+        Some(mut book) => {
+            book.next_page();
+            book.prev_page();
+            assert_eq!(book.get_current_page(), 1);
+        }
+        None => {
+            panic!("Book not created")
+        }
+    }
+}
