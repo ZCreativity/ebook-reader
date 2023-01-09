@@ -54,10 +54,6 @@ fn book_menu() -> impl Widget<AppState> {
         data.pop_view();
     });
 
-    let index_button = Button::new("Go to index").on_click(|_event, data: &mut AppState, _env| {
-        data.navigate_to_index();
-    });
-
     let edit_button = Button::new("Edit").on_click(|event, data: &mut AppState, _env| {
         let views = Arc::make_mut(&mut data.nav_state);
         views.push(UiView::BookEdit);
@@ -82,7 +78,6 @@ fn book_menu() -> impl Widget<AppState> {
 
     let flex = Flex::row()
         .with_child(back_button)
-        .with_child(index_button)
         .with_child(edit_button)
         .with_child(increase_font_button)
         .with_child(decrease_font_button)
@@ -115,14 +110,31 @@ fn top_right() -> impl Widget<AppState> {
 }
 
 fn book_controls() -> impl Widget<AppState> {
+
+    let first_page_button = Button::new("First page").on_click(|_event, data: &mut AppState, _env| {
+        data.navigate_to_index();
+    });
+
+    let last_page_button = Button::new("Last page").on_click(|_event, data: &mut AppState, _env| {
+        data.navigate_to_index();
+    });
+
+    let next_button = Button::new("Next").on_click(|_ctx, data: &mut AppState, _env| {
+        data.navigate_to_next_page();
+    });
+
+    let prev_button = Button::new("Prev").on_click(|_ctx, data: &mut AppState, _env| {
+        data.navigate_to_prev_page();
+    });
+
     let control_next = ViewSwitcher::new(
         |data: &AppState, _env| data.has_next_page(),
         |f, _data, _env| {
             if *f {
                 Box::new(
-                    Button::new("Next").on_click(|_ctx, data: &mut AppState, _env| {
-                        data.navigate_to_next_page();
-                    }),
+                    Flex::row()
+                    .with_child(next_button)
+                    .with_child(last_page_button),
                 )
             } else {
                 Box::new(SizedBox::empty())
@@ -135,9 +147,9 @@ fn book_controls() -> impl Widget<AppState> {
         |f, _data, _env| {
             if *f {
                 Box::new(
-                    Button::new("Prev").on_click(|_ctx, data: &mut AppState, _env| {
-                        data.navigate_to_prev_page();
-                    }),
+                    Flex::row()
+                    .with_child(first_page_button)
+                    .with_child(prev_button),
                 )
             } else {
                 Box::new(SizedBox::empty())
