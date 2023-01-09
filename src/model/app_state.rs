@@ -5,14 +5,13 @@ use crate::helper::{
 
 use super::{book::Book, ui_view::UiView};
 use druid::{Data, Lens};
-use image::{imageops, ImageFormat};
+
 use std::{
     fs::{self, ReadDir},
-    path::{Path, PathBuf},
+    path::PathBuf,
     rc::Rc,
     sync::Arc,
 };
-use tesseract::Tesseract;
 
 #[derive(Clone, Data, Lens, Debug)]
 pub struct AppState {
@@ -255,28 +254,15 @@ impl AppState {
         match selected_file {
             Some(file) => {
                 println!("Selected file: {:?}", file);
-                let file_path = Path::new(file.to_str().unwrap());
-
-                // Open an image with the "image" create and convert it to grayscale
-                let img = image::open(file_path).unwrap().grayscale();
-
-                // Initialize a new Tesseract instance, and set the image
-                // let mut ocr = tesseract::Tesseract::new(None, Some("eng")).unwrap();
-                // ocr.set_image(file.as_os_str().to_str().unwrap()).unwrap();
-
-                // // Extract text from image
-                // let text = ocr.get_text().unwrap();
-
-                // let engine = Tesseract::new(None, Some("eng")).unwrap();
-                // let engine = engine
-                //     .set_image(file.as_os_str().to_str().unwrap())
-                //     .unwrap();
-
-                // engine.set
 
                 let text = tesseract::ocr(file.as_os_str().to_str().unwrap(), "eng");
                 match text {
-                    Ok(text) => println!("Text: {}", text),
+                    Ok(text) => {
+                        println!("Text: {}", text);
+                        let book = self.get_library()[self.get_selected().unwrap()].clone();
+                        let page = book.get_page_from_ocr_text(text);
+                        println!("Page: {:?}", page);
+                    }
                     Err(err) => println!("Error {:?}", err),
                 }
             }
