@@ -112,11 +112,11 @@ fn top_right() -> impl Widget<AppState> {
 fn book_controls() -> impl Widget<AppState> {
 
     let first_page_button = Button::new("First page").on_click(|_event, data: &mut AppState, _env| {
-        data.navigate_to_index();
+        data.navigate_to_first_page();
     });
 
     let last_page_button = Button::new("Last page").on_click(|_event, data: &mut AppState, _env| {
-        data.navigate_to_index();
+        data.navigate_to_last_page();
     });
 
     let next_button = Button::new("Next").on_click(|_ctx, data: &mut AppState, _env| {

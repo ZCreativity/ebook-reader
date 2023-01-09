@@ -184,6 +184,16 @@ impl Book {
         }
     }
 
+    //Navigate to first page
+    pub fn navigate_to_first(&mut self) {
+        self.set_page(1);
+    }
+
+    //Navigate to last page
+    pub fn navigate_to_last(&mut self) {
+        self.set_page(self.get_book_length());
+    }
+
     /**
      * Get the current doc path
      * Example: OEBPS/chapter_001.xhtml (relative path to the epub file)
