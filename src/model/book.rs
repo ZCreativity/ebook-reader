@@ -20,7 +20,6 @@ pub struct Book {
     file_path: String,
 }
 
-
 impl Book {
     pub fn new(
         doc: EpubDoc<BufReader<File>>,
@@ -52,7 +51,7 @@ impl Book {
             cover,
             current_page_index: 1,
             current_page_str: String::new(),
-            file_path
+            file_path,
         }
     }
 
@@ -176,9 +175,7 @@ impl Book {
         match resource_id {
             Some(resource_id) => {
                 let page_index = doc.resource_id_to_chapter(resource_id);
-                println!(
-                    "Navigating to index"
-                );
+                println!("Navigating to index");
                 self.set_page(page_index.unwrap_or(1))
             }
             None => {
@@ -208,7 +205,13 @@ impl Book {
             let doc = self.get_doc().unwrap();
             let mut doc_mut = doc.lock().unwrap();
             doc_mut.set_current_page(page_index).unwrap();
-            Some(doc_mut.get_current_str().unwrap())
+            match doc_mut.get_current_str() {
+                Ok(current_str) => Some(current_str),
+                Err(err) => {
+                    println!("{:?}", err);
+                    None
+                }
+            }
         } else {
             None
         }

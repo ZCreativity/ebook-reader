@@ -107,7 +107,7 @@ fn header() -> impl Widget<AppState> {
 
     let add_book_button =
         Button::new("Add book").on_click(|_ctx: &mut EventCtx, data: &mut AppState, _| {
-            data.add_book();
+            data.add_book_from_file();
         });
 
     let mut header = Flex::row()

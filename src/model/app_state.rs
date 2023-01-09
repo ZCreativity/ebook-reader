@@ -7,6 +7,7 @@ use super::{book::Book, ui_view::UiView};
 use druid::{Data, Lens};
 use std::{
     fs::{self, ReadDir},
+    path::PathBuf,
     rc::Rc,
     sync::Arc,
 };
@@ -71,7 +72,7 @@ impl AppState {
     /**
      * Adds new book to the library
      */
-    pub fn add_book(&mut self) {
+    pub fn add_book_from_file(&mut self) {
         let path = open_native_dialog();
         let path = match path {
             None => {
@@ -100,6 +101,23 @@ impl AppState {
             }
             Err(e) => {
                 eprintln!("Error adding the book: {}", e)
+            }
+        }
+    }
+
+    pub fn add_book_from_path(&mut self, file: PathBuf) {
+        self.add_book(Some(file))
+    }
+
+    fn add_book(&mut self, path: Option<PathBuf>) {
+        let book = epub_to_book(path.unwrap());
+        match book {
+            Some(book) => {
+                let library = Arc::make_mut(&mut self.library);
+                library.push(book);
+            }
+            None => {
+                eprintln!("Error adding the book")
             }
         }
     }
