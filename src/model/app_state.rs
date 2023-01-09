@@ -12,6 +12,7 @@ use std::{
     rc::Rc,
     sync::Arc,
 };
+use tesseract::Tesseract;
 
 #[derive(Clone, Data, Lens, Debug)]
 pub struct AppState {
@@ -260,11 +261,24 @@ impl AppState {
                 let img = image::open(file_path).unwrap().grayscale();
 
                 // Initialize a new Tesseract instance, and set the image
-                let mut ocr = tesseract::Tesseract::new(None, Some("eng")).unwrap();
-                ocr.set_image(file.as_os_str().to_str().unwrap()).unwrap();
+                // let mut ocr = tesseract::Tesseract::new(None, Some("eng")).unwrap();
+                // ocr.set_image(file.as_os_str().to_str().unwrap()).unwrap();
 
-                // Extract text from image
-                let text = ocr.get_text().unwrap();
+                // // Extract text from image
+                // let text = ocr.get_text().unwrap();
+
+                // let engine = Tesseract::new(None, Some("eng")).unwrap();
+                // let engine = engine
+                //     .set_image(file.as_os_str().to_str().unwrap())
+                //     .unwrap();
+
+                // engine.set
+
+                let text = tesseract::ocr(file.as_os_str().to_str().unwrap(), "eng");
+                match text {
+                    Ok(text) => println!("Text: {}", text),
+                    Err(err) => println!("Error {:?}", err),
+                }
             }
             None => {
                 eprintln!("No file selected")
