@@ -115,7 +115,6 @@ impl Book {
     }
 
     pub fn set_page(&mut self, page_index: usize) {
-        println!("Setting page to: {}", page_index);
         self.current_page_index = page_index;
     }
 
