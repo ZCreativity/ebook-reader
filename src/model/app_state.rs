@@ -274,13 +274,13 @@ impl AppState {
         book.set_page(page);
     }
 
-    pub fn navigate_to_first_page(&mut self){
+    pub fn navigate_to_first_page(&mut self) {
         self.navigate_to_page_index(1);
     }
 
-    pub fn navigate_to_last_page(&mut self){
+    pub fn navigate_to_last_page(&mut self) {
         let library = Arc::make_mut(&mut self.library);
         let book = library.get_mut(self.selected.unwrap()).unwrap();
-        self.navigate_to_page_index(book.get_book_length() - 1);
+        book.set_page(book.get_book_length());
     }
 }
