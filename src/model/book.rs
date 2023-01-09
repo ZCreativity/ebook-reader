@@ -219,13 +219,10 @@ impl Book {
 
     pub fn get_page_from_ocr_text(&self, text: String) -> Option<usize> {
         // Iterate through all the text files in the epub doc
-        println!("Searching for text");
         let doc = self.get_doc().unwrap();
         let mut doc_mut = doc.lock().unwrap();
         let mut page_index = 1;
-        println!("Total pages: {}", doc_mut.spine.len());
         while page_index <= doc_mut.spine.len() - 1 {
-            println!("Searching page: {}", page_index);
             doc_mut.set_current_page(page_index).unwrap();
             match doc_mut.get_current_str() {
                 Ok(current_str) => {
@@ -235,7 +232,7 @@ impl Book {
                     }
                 }
                 Err(err) => {
-                    println!("{:?}", err);
+                    eprintln!("No page found, error: {:?}", err);
                     return None;
                 }
             }

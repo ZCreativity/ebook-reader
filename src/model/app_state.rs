@@ -253,8 +253,6 @@ impl AppState {
         let selected_file = open_native_dialog_images();
         match selected_file {
             Some(file) => {
-                println!("Selected file: {:?}", file);
-
                 let text = tesseract::ocr(file.as_os_str().to_str().unwrap(), "eng");
                 match text {
                     Ok(text) => {
@@ -267,7 +265,7 @@ impl AppState {
                                 self.navigate_to_page_index(page);
                             }
                             None => {
-                                println!("No page found");
+                                eprintln!("No page found");
                             }
                         }
                     }
