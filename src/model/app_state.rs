@@ -179,16 +179,6 @@ impl AppState {
         book.navigate_to(link);
     }
 
-    pub fn navigate_to_index(&mut self) {
-        if self.selected.is_none() {
-            return;
-        }
-        // Call the navigate_to method of the selected book
-        let library = Arc::make_mut(&mut self.library);
-        let book = library.get_mut(self.selected.unwrap()).unwrap();
-        book.navigate_to_index();
-    }
-
     pub fn has_next_page(&self) -> bool {
         if self.selected.is_none() {
             return false;
@@ -278,9 +268,19 @@ impl AppState {
         }
     }
 
-    fn navigate_to_page_index(&mut self, page: usize) {
+    pub fn navigate_to_page_index(&mut self, page: usize) {
         let library = Arc::make_mut(&mut self.library);
         let book = library.get_mut(self.selected.unwrap()).unwrap();
         book.set_page(page);
+    }
+
+    pub fn navigate_to_first_page(&mut self) {
+        self.navigate_to_page_index(1);
+    }
+
+    pub fn navigate_to_last_page(&mut self) {
+        let library = Arc::make_mut(&mut self.library);
+        let book = library.get_mut(self.selected.unwrap()).unwrap();
+        book.set_page(book.get_book_length());
     }
 }

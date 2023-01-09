@@ -95,7 +95,7 @@ impl Book {
     }
 
     pub fn has_next_page(&self) -> bool {
-        self.current_page_index < self.get_book_length() - 1
+        self.current_page_index < self.get_book_length()
     }
 
     pub fn has_prev_page(&self) -> bool {
@@ -161,27 +161,15 @@ impl Book {
         }
     }
 
-    pub fn navigate_to_index(&mut self) {
-        let binding = self.get_doc().unwrap();
-        let doc = binding.lock().unwrap();
+    // //Navigate to first page
+    // pub fn navigate_to_first(&mut self) {
+    //     self.set_page(1);
+    // }
 
-        let resource_id = doc
-            .resources
-            .iter()
-            .find(|(_, (path, _))| path.ends_with("OEBPS/bk01-toc.xhtml"))
-            .map(|(id, _)| id);
-
-        match resource_id {
-            Some(resource_id) => {
-                let page_index = doc.resource_id_to_chapter(resource_id);
-                println!("Navigating to index");
-                self.set_page(page_index.unwrap_or(1))
-            }
-            None => {
-                eprintln!("Error navigating to index");
-            }
-        }
-    }
+    // //Navigate to last page
+    // pub fn navigate_to_last(&mut self) {
+    //     self.set_page(self.get_book_length());
+    // }
 
     /**
      * Get the current doc path
