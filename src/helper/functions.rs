@@ -1,9 +1,11 @@
 use epub::doc::EpubDoc;
+use html2text::from_read;
 use native_dialog::FileDialog;
 use std::{
     fs,
     io::{Read, Write},
     path::{Path, PathBuf},
+    sync::Arc,
 };
 
 use crate::{
@@ -95,8 +97,38 @@ pub fn epub_to_book(path: PathBuf) -> Option<Book> {
         }
     };
 
+    // Count words in book
+    let mut word_count_chapters = Vec::<i32>::new();
+    for _i in 0..doc.get_num_pages() - 1 {
+        let page_str = doc.get_current_str();
+        let text = from_read(page_str.unwrap().as_bytes(), 10000);
+        match doc.go_next() {
+            Ok(_) => (),
+            Err(e) => {
+                println!("Error: {}", e);
+                break;
+            }
+        }
+        word_count_chapters.push(text.split_whitespace().count() as i32);
+    }
+    println!("Word count: {:?}", word_count_chapters);
+
     match cover_path {
-        None => Some(Book::new(doc, title, author, String::new(), file_path)),
-        Some(cover_path) => Some(Book::new(doc, title, author, cover_path, file_path)),
+        None => Some(Book::new(
+            doc,
+            title,
+            author,
+            String::new(),
+            file_path,
+            Arc::new(word_count_chapters),
+        )),
+        Some(cover_path) => Some(Book::new(
+            doc,
+            title,
+            author,
+            cover_path,
+            file_path,
+            Arc::new(word_count_chapters),
+        )),
     }
 }

@@ -21,6 +21,7 @@ pub struct Book {
     current_page_str: String,
     file_path: String,
     has_progress: bool,
+    word_count_chapters: Arc<Vec<i32>>,
 }
 
 impl Book {
@@ -30,6 +31,7 @@ impl Book {
         author: String,
         cover_path: String,
         file_path: String,
+        word_count_chapters: Arc<Vec<i32>>,
     ) -> Self {
         // Extract cover image from cover_path
         let cover = if cover_path.is_empty() {
@@ -79,6 +81,7 @@ impl Book {
             current_page_str: String::new(),
             file_path,
             has_progress: progress,
+            word_count_chapters,
         }
     }
 
@@ -92,6 +95,7 @@ impl Book {
             current_page_str: String::new(),
             file_path: String::new(),
             has_progress: false,
+            word_count_chapters: Arc::new(Vec::new()),
         }
     }
 
@@ -157,6 +161,10 @@ impl Book {
     pub fn get_file_path(&self) -> String {
         self.file_path.clone()
     }
+
+    // pub fn get_word_count(&self) -> i32 {
+    //     self.word_count
+    // }
 
     /**
      * doc.resources
@@ -262,27 +270,6 @@ impl Book {
         Ok(())
     }
 
-    /** Deserialize the book progress from the json file */
-    // pub fn get_progress(&self) -> Option<usize> {
-    //     if self.has_progress {
-    //         let saved_progress_path =
-    //             SAVED_PROGRESS_PATH.to_owned() + &self.title.as_str().replace(" ", "-") + ".json";
-    //         let file = File::open(saved_progress_path);
-    //         match file {
-    //             Ok(file) => {
-    //                 let reader = BufReader::new(file);
-    //                 let json: usize = serde_json::from_reader(reader).unwrap();
-    //                 return Some(json);
-    //             }
-    //             Err(e) => {
-    //                 eprintln!("Error getting progress: {}", e);
-    //                 return None;
-    //             }
-    //         }
-    //     }
-    //     return None;
-    // }
-
     pub fn get_has_progress(&self) -> bool {
         self.has_progress
     }
@@ -300,6 +287,7 @@ impl Debug for Book {
             .field("cover", &self.cover)
             .field("current_page_index", &self.current_page_index)
             .field("current_page_str", &self.current_page_str)
+            .field("word_count", &self.word_count_chapters)
             .finish()
     }
 }
