@@ -21,6 +21,7 @@ pub const TITLE: FontDescriptor = FontDescriptor::new(FontFamily::SERIF)
 
 /* Data */
 pub const LIBRARY_PATH: &str = "./src/library";
+pub const SAVED_PROGRESS_PATH: &str = "./src/library/progress/";
 pub const COVERS_PATH: &str = "./src/library/covers/";
 
 /* Cover placeholder */

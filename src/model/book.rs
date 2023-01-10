@@ -1,12 +1,14 @@
 use druid::{Data, ImageBuf, Lens};
 use epub::doc::EpubDoc;
+use std::error::Error;
 use std::fmt::Debug;
 use std::fs::File;
-use std::io::BufReader;
+use std::io::{BufReader, Write};
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 
+use crate::helper::config::SAVED_PROGRESS_PATH;
 use crate::helper::functions::path_to_bytes;
 
 #[derive(Data, Clone, Lens)]
@@ -161,16 +163,6 @@ impl Book {
         }
     }
 
-    // //Navigate to first page
-    // pub fn navigate_to_first(&mut self) {
-    //     self.set_page(1);
-    // }
-
-    // //Navigate to last page
-    // pub fn navigate_to_last(&mut self) {
-    //     self.set_page(self.get_book_length());
-    // }
-
     /**
      * Get the current doc path
      * Example: OEBPS/chapter_001.xhtml (relative path to the epub file)
@@ -204,6 +196,9 @@ impl Book {
         }
     }
 
+    /**
+     * Get the page index from ocr text.
+     */
     pub fn get_page_from_ocr_text(&self, text: String) -> Option<usize> {
         // Iterate through all the text files in the epub doc
         let doc = self.get_doc().unwrap();
@@ -226,6 +221,17 @@ impl Book {
             page_index += 1;
         }
         return None;
+    }
+
+    /**
+     * Save the current page to a json file (for keeping track of the reading page)
+     */
+    pub fn save_progress(&self) -> Result<(), Box<dyn Error>> {
+        let json = serde_json::to_string(&self.current_page_index)?;
+        let saved_progress_path = SAVED_PROGRESS_PATH.to_owned() + self.title.as_str() + ".json";
+        let mut file = File::create(saved_progress_path)?;
+        file.write_all(json.as_bytes())?;
+        Ok(())
     }
 }
 
