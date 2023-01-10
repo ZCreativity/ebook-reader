@@ -111,8 +111,16 @@ fn top_right() -> impl Widget<AppState> {
             data.ocr_from_file();
         });
 
+    let reverse_ocr_button = Button::new("Get physical page of this chapter").on_click(
+        |_ctx, data: &mut AppState, _env| {
+            data.reverse_ocr();
+        },
+    );
+
     Flex::row()
         .with_child(ocr_button)
+        .with_default_spacer()
+        .with_child(reverse_ocr_button)
         .with_default_spacer()
         .with_child(page_counter)
 }

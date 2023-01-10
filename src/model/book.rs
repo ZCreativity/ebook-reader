@@ -162,9 +162,9 @@ impl Book {
         self.file_path.clone()
     }
 
-    // pub fn get_word_count(&self) -> i32 {
-    //     self.word_count
-    // }
+    pub fn get_word_count(&self) -> Arc<Vec<i32>> {
+        self.word_count_chapters.clone()
+    }
 
     /**
      * doc.resources

@@ -304,4 +304,24 @@ impl AppState {
             }
         }
     }
+
+    /**
+     * Reverse OCR
+     * Get the word count from page 1 to current page, then
+     * exstimate a total of 300-400 words for page in a real book
+     * and existimate the possible physical page.
+     */
+    pub fn reverse_ocr(&mut self) -> (i32, i32) {
+        let book = self.get_library()[self.get_selected().unwrap()].clone();
+        let page = book.get_current_page();
+
+        let word_count_chapter = book.get_word_count();
+        let word_count_till_page = word_count_chapter.iter().take(page + 1).sum::<i32>();
+        let page_range_start = word_count_till_page / 300;
+        let page_range_end = word_count_till_page / 450;
+        println!("Page range start: {}", page_range_start);
+        println!("Page range end: {}", page_range_end);
+        // +1 because the page 0 on a physical book has weird numbering
+        (page_range_start + 1, page_range_end + 1)
+    }
 }
