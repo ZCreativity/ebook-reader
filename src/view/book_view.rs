@@ -29,10 +29,8 @@ pub fn book_view() -> Box<dyn Widget<AppState>> {
         .cross_axis_alignment(CrossAxisAlignment::Start)
         .must_fill_main_axis(true);
 
-    let book_text = Scroll::new(book_page)
-        .vertical()
-        .fix_height(600.0);
-        //.fix_width(700.0);
+    let book_text = Scroll::new(book_page).vertical().fix_height(600.0);
+    //.fix_width(700.0);
 
     let bottom_bar = Flex::row()
         .with_child(book_controls)
@@ -77,11 +75,17 @@ fn book_menu() -> impl Widget<AppState> {
         data.decrease_font_size();
     });
 
+    let save_book_progress = Button::new("Bookmark").on_click(|_ctx, data: &mut AppState, _env| {
+        println!("Saving book progress");
+        data.save_book_progress();
+    });
+
     let flex = Flex::row()
         .with_child(back_button)
         .with_child(edit_button)
         .with_child(increase_font_button)
         .with_child(decrease_font_button)
+        .with_child(save_book_progress)
         .cross_axis_alignment(CrossAxisAlignment::Start)
         .must_fill_main_axis(true)
         .padding(Insets::new(0.0, 0.0, 0.0, PADDING_LG));

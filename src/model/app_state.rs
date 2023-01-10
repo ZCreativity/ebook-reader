@@ -227,6 +227,22 @@ impl AppState {
         book.prev_page();
     }
 
+    pub fn navigate_to_page_index(&mut self, page: usize) {
+        let library = Arc::make_mut(&mut self.library);
+        let book = library.get_mut(self.selected.unwrap()).unwrap();
+        book.set_page(page);
+    }
+
+    pub fn navigate_to_first_page(&mut self) {
+        self.navigate_to_page_index(1);
+    }
+
+    pub fn navigate_to_last_page(&mut self) {
+        let library = Arc::make_mut(&mut self.library);
+        let book = library.get_mut(self.selected.unwrap()).unwrap();
+        book.set_page(book.get_book_length());
+    }
+
     pub fn set_editing_page(&mut self) {
         if self.selected.is_none() {
             return;
@@ -246,7 +262,20 @@ impl AppState {
         }
     }
 
-    //** OCR */
+    /** Save book progress */
+    pub fn save_book_progress(&mut self) {
+        if self.selected.is_none() {
+            return;
+        }
+        let library = Arc::make_mut(&mut self.library);
+        let book = library.get_mut(self.selected.unwrap()).unwrap();
+        match book.save_progress() {
+            Ok(_) => println!("Saved"),
+            Err(err) => eprintln!("Not saved, {}", err),
+        }
+    }
+
+    /** OCR */
     pub fn ocr_from_file(&mut self) {
         let selected_file = open_native_dialog_images();
         match selected_file {
@@ -274,21 +303,5 @@ impl AppState {
                 eprintln!("No file selected")
             }
         }
-    }
-
-    pub fn navigate_to_page_index(&mut self, page: usize) {
-        let library = Arc::make_mut(&mut self.library);
-        let book = library.get_mut(self.selected.unwrap()).unwrap();
-        book.set_page(page);
-    }
-
-    pub fn navigate_to_first_page(&mut self) {
-        self.navigate_to_page_index(1);
-    }
-
-    pub fn navigate_to_last_page(&mut self) {
-        let library = Arc::make_mut(&mut self.library);
-        let book = library.get_mut(self.selected.unwrap()).unwrap();
-        book.set_page(book.get_book_length());
     }
 }

@@ -4,7 +4,7 @@ use std::error::Error;
 use std::fmt::Debug;
 use std::fs::File;
 use std::io::{BufReader, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 
@@ -20,6 +20,7 @@ pub struct Book {
     current_page_index: usize,
     current_page_str: String,
     file_path: String,
+    has_progress: bool,
 }
 
 impl Book {
@@ -45,15 +46,39 @@ impl Book {
             }
         };
 
+        // Check if the book has a title.json file in progress folder
+        let progress = Path::new(SAVED_PROGRESS_PATH)
+            .join(title.clone().replace(" ", "-") + ".json")
+            .exists();
+
+        let mut current_page_index = 1;
+        if progress {
+            let saved_progress_path =
+                SAVED_PROGRESS_PATH.to_owned() + &title.as_str().replace(" ", "-") + ".json";
+            let file = File::open(saved_progress_path);
+            current_page_index = match file {
+                Ok(file) => {
+                    let reader = BufReader::new(file);
+                    let json: usize = serde_json::from_reader(reader).unwrap();
+                    json
+                }
+                Err(e) => {
+                    eprintln!("Error getting progress: {}", e);
+                    1
+                }
+            }
+        }
+
         // Create book
         Self {
             doc: Some(Arc::new(Mutex::new(doc))),
             title,
             author,
             cover,
-            current_page_index: 1,
+            current_page_index,
             current_page_str: String::new(),
             file_path,
+            has_progress: progress,
         }
     }
 
@@ -66,6 +91,7 @@ impl Book {
             current_page_index: 0,
             current_page_str: String::new(),
             file_path: String::new(),
+            has_progress: false,
         }
     }
 
@@ -226,12 +252,43 @@ impl Book {
     /**
      * Save the current page to a json file (for keeping track of the reading page)
      */
-    pub fn save_progress(&self) -> Result<(), Box<dyn Error>> {
+    pub fn save_progress(&mut self) -> Result<(), Box<dyn Error>> {
         let json = serde_json::to_string(&self.current_page_index)?;
-        let saved_progress_path = SAVED_PROGRESS_PATH.to_owned() + self.title.as_str() + ".json";
+        let saved_progress_path =
+            SAVED_PROGRESS_PATH.to_owned() + &self.title.as_str().replace(" ", "-") + ".json";
         let mut file = File::create(saved_progress_path)?;
         file.write_all(json.as_bytes())?;
+        self.set_has_progress();
         Ok(())
+    }
+
+    /** Deserialize the book progress from the json file */
+    // pub fn get_progress(&self) -> Option<usize> {
+    //     if self.has_progress {
+    //         let saved_progress_path =
+    //             SAVED_PROGRESS_PATH.to_owned() + &self.title.as_str().replace(" ", "-") + ".json";
+    //         let file = File::open(saved_progress_path);
+    //         match file {
+    //             Ok(file) => {
+    //                 let reader = BufReader::new(file);
+    //                 let json: usize = serde_json::from_reader(reader).unwrap();
+    //                 return Some(json);
+    //             }
+    //             Err(e) => {
+    //                 eprintln!("Error getting progress: {}", e);
+    //                 return None;
+    //             }
+    //         }
+    //     }
+    //     return None;
+    // }
+
+    pub fn get_has_progress(&self) -> bool {
+        self.has_progress
+    }
+
+    pub fn set_has_progress(&mut self) {
+        self.has_progress = true;
     }
 }
 

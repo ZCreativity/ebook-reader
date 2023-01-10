@@ -6,7 +6,7 @@ use crate::{
 use druid::{
     widget::{
         Button, Container, FillStrat, Flex, Image, Label, List, ListIter, MainAxisAlignment,
-        Padding, Painter, Scroll, Svg, ViewSwitcher,
+        Padding, Painter, Scroll, SizedBox, Svg, ViewSwitcher,
     },
     Color, Command, Data, EventCtx, RenderContext, Target, Widget, WidgetExt,
 };
@@ -57,9 +57,34 @@ pub fn library() -> Box<dyn Widget<AppState>> {
             },
         ));
 
+        // Book progress (if any)
+        let progress_switcher = ViewSwitcher::new(
+            |(_views, book, _selected, _idx): &(Arc<Vec<UiView>>, Book, Option<usize>, usize),
+             _env| book.get_has_progress(),
+            move |f, _data, _env| {
+                if *f {
+                    Box::new(Button::new("Keep Reading").on_click(
+                        |event, data: &mut (Arc<Vec<UiView>>, Book, Option<usize>, usize), _env| {
+                            println!("Keep Reading: {}", data.1.get_title());
+                            let new_views = Arc::make_mut(&mut data.0);
+                            new_views.push(UiView::BookRead);
+                            data.0 = Arc::new(new_views.to_owned());
+                            data.2 = Some(data.3);
+                            event.submit_command(Command::new(BOOK_READ, data.3, Target::Auto));
+                        },
+                    ))
+                } else {
+                    Box::new(SizedBox::empty())
+                }
+            },
+        );
+
         // Layout of single book
         let details = Flex::column().with_child(book_title).with_child(email_text);
-        let layout = Flex::row().with_child(cover).with_child(details);
+        let layout = Flex::row()
+            .with_child(cover)
+            .with_child(details)
+            .with_child(progress_switcher);
 
         // Open book on click
         // 1. Make the view arc mutable
