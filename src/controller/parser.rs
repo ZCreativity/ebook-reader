@@ -19,7 +19,7 @@ pub fn parse(page: String) -> impl Widget<AppState> {
             let mut flex =
                 Flex::column().cross_axis_alignment(druid::widget::CrossAxisAlignment::Start);
             let mut vect = Vec::<Vec<TaggedLine<Vec<RichAnnotation>>>>::new();
-            vect.push(from_read_rich(page.as_bytes(), 100));
+            vect.push(from_read_rich(page.as_bytes(), 150));
 
             let new_vector = vect.concat();
             // Render

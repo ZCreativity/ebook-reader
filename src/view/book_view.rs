@@ -31,8 +31,8 @@ pub fn book_view() -> Box<dyn Widget<AppState>> {
 
     let book_text = Scroll::new(book_page)
         .vertical()
-        .fix_height(400.0)
-        .fix_width(700.0);
+        .fix_height(600.0);
+        //.fix_width(700.0);
 
     let bottom_bar = Flex::row()
         .with_child(book_controls)
@@ -41,8 +41,9 @@ pub fn book_view() -> Box<dyn Widget<AppState>> {
     let layout = Flex::column()
         .with_child(top_bar)
         .with_child(book_text)
+        .with_spacer(20_f64)
         .with_child(bottom_bar)
-        .cross_axis_alignment(CrossAxisAlignment::Start);
+        .cross_axis_alignment(CrossAxisAlignment::Center);
 
     let container = Padding::new(PADDING_LG, Container::new(layout.center()));
 
@@ -106,7 +107,10 @@ fn top_right() -> impl Widget<AppState> {
             data.ocr_from_file();
         });
 
-    Flex::row().with_child(ocr_button).with_child(page_counter)
+    Flex::row()
+        .with_child(ocr_button)
+        .with_default_spacer()
+        .with_child(page_counter)
 }
 
 fn book_controls() -> impl Widget<AppState> {
