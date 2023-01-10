@@ -159,10 +159,18 @@ impl AppState {
     }
 
     pub fn increase_font_size(&mut self) {
+        if self.font_size >= 20.0 {
+            self.font_size = 20.0;
+            return;
+        }
         self.font_size += 2.0;
     }
 
     pub fn decrease_font_size(&mut self) {
+        if self.font_size <= 4.0 {
+            self.font_size = 4.0;
+            return;
+        }
         self.font_size -= 2.0;
     }
 

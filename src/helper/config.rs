@@ -11,7 +11,7 @@ pub const PADDING_LG: f64 = 32.0;
 // pub const PADDING_XL: f64 = 64.0;
 
 /* Font Sizes */
-pub const DEFAULT_FONT_SIZE: f64 = 16.0;
+pub const DEFAULT_FONT_SIZE: f64 = 8.0;
 pub const TITLE_SIZE: f64 = 24.0;
 
 /* Text Styles */
