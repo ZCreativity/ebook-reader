@@ -117,11 +117,29 @@ fn top_right() -> impl Widget<AppState> {
         },
     );
 
+    let reverse_ocr_result_label = ViewSwitcher::new(
+        |data: &AppState, _env| {
+            data.get_library()[data.get_selected().unwrap()].get_physical_page_range()
+        },
+        |f, data, _env| {
+            if f.is_some() {
+                println!("Poradsafds");
+                let (start, end) = data.get_library()[data.get_selected().unwrap()]
+                    .get_physical_page_range()
+                    .unwrap();
+                Box::new(Label::new(format!("Page range: {}-{}", start, end)))
+            } else {
+                Box::new(Label::new(""))
+            }
+        },
+    );
+
     Flex::row()
         .with_child(ocr_button)
         .with_default_spacer()
         .with_child(reverse_ocr_button)
         .with_default_spacer()
+        .with_child(reverse_ocr_result_label)
         .with_child(page_counter)
 }
 

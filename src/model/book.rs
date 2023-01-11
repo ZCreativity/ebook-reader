@@ -22,6 +22,7 @@ pub struct Book {
     file_path: String,
     has_progress: bool,
     word_count_chapters: Arc<Vec<i32>>,
+    physical_page_range: Option<(i32, i32)>,
 }
 
 impl Book {
@@ -82,6 +83,7 @@ impl Book {
             file_path,
             has_progress: progress,
             word_count_chapters,
+            physical_page_range: None,
         }
     }
 
@@ -96,6 +98,7 @@ impl Book {
             file_path: String::new(),
             has_progress: false,
             word_count_chapters: Arc::new(Vec::new()),
+            physical_page_range: None,
         }
     }
 
@@ -135,18 +138,21 @@ impl Book {
     }
 
     pub fn next_page(&mut self) {
+        self.reset_page_range();
         if self.has_next_page() {
             self.current_page_index += 1;
         }
     }
 
     pub fn prev_page(&mut self) {
+        self.reset_page_range();
         if self.has_prev_page() {
             self.current_page_index -= 1;
         }
     }
 
     pub fn set_page(&mut self, page_index: usize) {
+        self.reset_page_range();
         self.current_page_index = page_index;
     }
 
@@ -172,6 +178,7 @@ impl Book {
      * Get the resource id of the resource which the resource full path ends with the link
      */
     pub fn navigate_to(&mut self, link: Rc<String>) {
+        self.reset_page_range();
         let binding = self.get_doc().unwrap();
         let doc = binding.lock().unwrap();
 
@@ -255,6 +262,34 @@ impl Book {
             page_index += 1;
         }
         return None;
+    }
+
+    /**
+     * Get the physical page from chapter page.
+     */
+    pub fn reverse_ocr(&mut self) {
+        let page = self.get_current_page();
+
+        let word_count_chapter = self.get_word_count();
+        let word_count_till_page = word_count_chapter.iter().take(page + 1).sum::<i32>();
+        let page_range_start = word_count_till_page / 450;
+        let page_range_end = word_count_till_page / 300;
+        println!("Page range start: {}", page_range_start);
+        println!("Page range end: {}", page_range_end);
+        // +1 because the page 0 on a physical book has weird numbering
+        self.set_physical_page_range((page_range_start + 1, page_range_end + 1));
+    }
+
+    pub fn set_physical_page_range(&mut self, page_range: (i32, i32)) {
+        self.physical_page_range = Some(page_range);
+    }
+
+    pub fn reset_page_range(&mut self) {
+        self.physical_page_range = None;
+    }
+
+    pub fn get_physical_page_range(&self) -> Option<(i32, i32)> {
+        self.physical_page_range
     }
 
     /**
