@@ -4,24 +4,38 @@ use crate::{
         app_state::AppState,
         book::Book,
         edit_state::{EditState, EditTransfer},
-    },
+    }, helper::config::{TITLE, PADDING_LG},
 };
 use druid::{
     widget::{
         Button, Container, CrossAxisAlignment, Flex, Label, MainAxisAlignment, Scope, Scroll,
-        TextBox,
+        TextBox, Padding,
     },
     Widget, WidgetExt,
 };
 use druid_widget_nursery::navigator::ViewController;
 
-pub fn book_edit() -> Box<dyn Widget<AppState>> {
+fn header() -> impl Widget<AppState> {
+    let header_label = Label::new("Ebook Editor").with_font(TITLE);
+
+    let mut header = Flex::row()
+        .with_child(header_label)
+        .main_axis_alignment(MainAxisAlignment::SpaceBetween)
+        .must_fill_main_axis(true);
+        
     let back_button = Button::new("Back").on_click(|_event, data: &mut AppState, _env| {
         data.pop_view();
     });
 
-    let name_input = Flex::column()
-        .with_child(Label::new("Title"))
+    header.add_child(back_button);
+
+    header
+    
+}
+
+pub fn book_edit() -> Box<dyn Widget<AppState>> {
+
+    let textbox = Flex::column()
         .with_child(
             Scroll::new(
                 TextBox::multiline()
@@ -30,12 +44,12 @@ pub fn book_edit() -> Box<dyn Widget<AppState>> {
                     .lens(Book::current_page_str),
             )
             .vertical()
-            .fix_height(500.0),
+            .fix_height(600.0),
         )
         .cross_axis_alignment(CrossAxisAlignment::Start);
 
     let layout = Flex::column()
-        .with_child(name_input)
+        .with_child(textbox)
         .must_fill_main_axis(true)
         .main_axis_alignment(MainAxisAlignment::Center)
         .cross_axis_alignment(CrossAxisAlignment::Start)
@@ -58,11 +72,9 @@ pub fn book_edit() -> Box<dyn Widget<AppState>> {
     // when the save button is clicked
     let layout = Scope::from_function(EditState::new, EditTransfer, layout);
     let layout = Flex::column()
-        .with_child(back_button)
+        .with_child(header())
         .with_flex_child(layout, 1.0)
         .main_axis_alignment(MainAxisAlignment::SpaceAround);
 
-    let container = Container::new(layout);
-
-    Box::new(container)
+        Box::new(Padding::new(PADDING_LG, Container::new(layout)))
 }
