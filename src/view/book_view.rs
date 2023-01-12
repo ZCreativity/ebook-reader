@@ -30,8 +30,6 @@ pub fn book_view() -> Box<dyn Widget<AppState>> {
         .must_fill_main_axis(true);
 
     let book_text = Scroll::new(book_page).vertical().fix_height(600.0);
-    //.fix_width(700.0);
-
     let bottom_bar = Flex::row()
         .with_child(book_controls)
         .main_axis_alignment(MainAxisAlignment::End);
