@@ -85,61 +85,133 @@ impl ScopeTransfer for EditTransfer {
                     let new_epub_path = epub_path.replace(".epub", "-edit.epub");
 
                     //Converting epub into zip
-                    fs::copy(epub_path, zip_path).expect("Error encountered while copying file!");
+                    match fs::copy(epub_path, zip_path){
+                        Ok(_) => (),
+                        Err(_) => {
+                            eprintln!("Error encountered while copying file!");
+                            return;
+                        }
+                    };
 
-                    let zip_file = File::options()
+                    let zip_file = match File::options()
                         .write(true)
                         .read(true)
-                        .open(zip_path)
-                        .unwrap();
+                        .open(zip_path){
+                            Ok(file) => file,
+                            Err(_) => {
+                                eprintln!("Error encountered while opening zip file!");
+                                return;
+                            }
+                        };
 
                     //Extract the zip
-                    let mut archive = ZipArchive::new(zip_file).unwrap();
-                    archive
-                        .extract(dir_path)
-                        .expect("Error encountered while extracting zip files");
+                    let mut archive = match ZipArchive::new(zip_file){
+                        Ok(archive) => archive,
+                        Err(_) => {
+                            eprintln!("Error encountered while opening zip file!");
+                            return;
+                        }
+                    };
+                    match archive.extract(dir_path){
+                            Ok(_) => (),
+                            Err(_) => {
+                                eprintln!("Error encountered while extracting zip file!");
+                                return;
+                            }
+                    };
+                        
 
                     //Replace old file with the edit one
-                    let mut edited_file = File::create(dir_file_path.as_str())
-                        .expect("Error encountered while editing old file!");
-                    edited_file
-                        .write_all(edited_html.as_bytes())
-                        .expect("Error encountered while editing old file!");
+                    let mut edited_file = match File::create(dir_file_path.as_str()){
+                        Ok(file) => file,
+                        Err(_) => {
+                            eprintln!("Error encountered while editing old file!");
+                            return;
+                        }
+                    };
+                    match edited_file.write_all(edited_html.as_bytes()){
+                        Ok(_) => (),
+                        Err(_) => {
+                            eprintln!("Error encountered while editing old file!");
+                            return;
+                        }
+                    };
 
                     //Replace the title
-
                     let dir_metadata_path = [dir_path, "OEBPS/package.opf"].join("/");
-                    let edited_metadata_string = fs::read_to_string(dir_metadata_path.as_str())
-                        .expect("Error encountered while reading metadata file!");
-
-                    let mut metadata_file = File::create(dir_metadata_path.as_str())
-                        .expect("Error encountered while editing metadata file!");
-                    metadata_file
-                        .write_all(
+                    let edited_metadata_string = match fs::read_to_string(dir_metadata_path.as_str()){
+                        Ok(string) => string,
+                        Err(_) => {
+                            eprintln!("Error encountered while editing metadata file!");
+                            return;
+                        }
+                    };
+                    let mut metadata_file = match File::create(dir_metadata_path.as_str()){
+                        Ok(file) => file,
+                        Err(_) => {
+                            eprintln!("Error encountered while editing metadata file!");
+                            return;
+                        }
+                    };
+                        
+                    match metadata_file.write_all(
                             edited_metadata_string
                                 .replace("</dc:title>", " (edit)</dc:title>")
                                 .as_bytes(),
-                        )
-                        .expect("Error encountered while editing metafile");
+                    ){
+                        Ok(_) => (),
+                        Err(_) => {
+                            eprintln!("Error encountered while editing metadata file!");
+                            return;
+                        }
+                    };
+                        
 
                     //Converting directory into zip
                     let new_zip_path_buf = PathBuf::from(OsString::from(new_zip_path));
                     let dir_path_buf = PathBuf::from(OsString::from(dir_path));
-                    zip_extensions::write::zip_create_from_directory(
+                    match zip_extensions::write::zip_create_from_directory(
                         &new_zip_path_buf,
                         &dir_path_buf,
-                    )
-                    .expect("Error while zipping the directory");
+                    ){
+                        Ok(_) => (),
+                        Err(_) => {
+                            eprintln!("Error while zipping the directory");
+                            return;
+                        }
+                    };
 
                     //Converting zip into epub
-                    fs::copy(new_zip_path, new_epub_path.clone())
-                        .expect("Error encountered while copying file!");
+                    match fs::copy(new_zip_path, new_epub_path.clone()){
+                        Ok(_) => (),
+                        Err(_) => {
+                            eprintln!("Error encountered while copying file!");
+                            return;
+                        }
+                    };
 
                     //Delete unnecesesary file
-                    fs::remove_file(zip_path).expect("Error while deleting old zip");
-                    fs::remove_file(new_zip_path).expect("Error while deleting new zip");
-                    fs::remove_dir_all(dir_path)
-                        .expect("Error encountered while deleting directory");
+                    match fs::remove_file(zip_path){
+                        Ok(_) => (),
+                        Err(_) => {
+                            eprintln!("Error encountered while deleting zip file!");
+                            return;
+                        }
+                    };
+                    match fs::remove_file(new_zip_path){
+                        Ok(_) => (),
+                        Err(_) => {
+                            eprintln!("Error encountered while deleting zip file!");
+                            return;
+                        }
+                    };
+                    match fs::remove_dir_all(dir_path){
+                        Ok(_) => (),
+                        Err(_) => {
+                            eprintln!("Error encountered while deleting directory!");
+                            return;
+                        }
+                    };
 
                     inner.add_book_from_path(PathBuf::from(new_epub_path))
                 }
