@@ -123,7 +123,6 @@ fn top_right() -> impl Widget<AppState> {
         },
         |f, data, _env| {
             if f.is_some() {
-                println!("Poradsafds");
                 let (start, end) = data.get_library()[data.get_selected().unwrap()]
                     .get_physical_page_range()
                     .unwrap();
