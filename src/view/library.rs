@@ -91,9 +91,7 @@ pub fn library() -> Box<dyn Widget<AppState>> {
         let book_layout = Flex::row()
             .with_child(cover)
             .with_spacer(PADDING_SM)
-            .with_child(details)
-            .fix_height(RECT_SIZE.height)
-            .fix_width(RECT_SIZE.width);
+            .with_child(details);
 
         // Open book on click
         // 1. Make the view arc mutable
