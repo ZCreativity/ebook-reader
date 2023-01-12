@@ -312,7 +312,8 @@ impl AppState {
      * and existimate the possible physical page.
      */
     pub fn reverse_ocr(&mut self) {
-        let mut book = self.get_library()[self.get_selected().unwrap()].clone();
+        let library = Arc::make_mut(&mut self.library);
+        let book = library.get_mut(self.selected.unwrap()).unwrap();
         book.reverse_ocr()
     }
 }

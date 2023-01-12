@@ -21,6 +21,7 @@ pub fn book_view() -> Box<dyn Widget<AppState>> {
     let top_right_buttons = top_right();
     let book_controls = book_controls();
     let book_page = book_page();
+    let reverse_ocr_row = reverse_ocr_row();
 
     let top_bar = Flex::row()
         .with_child(book_menu)
@@ -36,6 +37,7 @@ pub fn book_view() -> Box<dyn Widget<AppState>> {
 
     let layout = Flex::column()
         .with_child(top_bar)
+        .with_child(reverse_ocr_row)
         .with_child(book_text)
         .with_spacer(20_f64)
         .with_child(bottom_bar)
@@ -91,6 +93,36 @@ fn book_menu() -> impl Widget<AppState> {
     flex
 }
 
+fn reverse_ocr_row() -> impl Widget<AppState>{
+
+    let reverse_ocr_button = Button::new("Get physical page of this chapter").on_click(
+        |_ctx, data: &mut AppState, _env| {
+            data.reverse_ocr();
+        },
+    );
+
+    let reverse_ocr_result_label = ViewSwitcher::new(
+        |data: &AppState, _env|
+            data.get_library()[data.get_selected().unwrap()].get_physical_page_range(),
+        |f, data, _env| {
+            if f.is_some() {
+                let (start, end) = data.get_library()[data.get_selected().unwrap()]
+                    .get_physical_page_range()
+                    .unwrap();
+                Box::new(Label::new(format!("Page range: {}-{}", start, end)))
+            } else {
+                Box::new(Label::new(""))
+            }
+        },
+    );
+
+    Flex::row()
+        .with_child(reverse_ocr_button)
+        .with_default_spacer()
+        .with_child(reverse_ocr_result_label)
+        .main_axis_alignment(MainAxisAlignment::Start)
+}
+
 fn top_right() -> impl Widget<AppState> {
     let page_counter = Label::dynamic(|data: &AppState, _env: &Env| {
         if let Some(idx) = data.get_selected() {
@@ -109,35 +141,9 @@ fn top_right() -> impl Widget<AppState> {
             data.ocr_from_file();
         });
 
-    let reverse_ocr_button = Button::new("Get physical page of this chapter").on_click(
-        |_ctx, data: &mut AppState, _env| {
-            data.reverse_ocr();
-        },
-    );
-
-    let reverse_ocr_result_label = ViewSwitcher::new(
-        |data: &AppState, _env| {
-            data.get_library()[data.get_selected().unwrap()].get_physical_page_range()
-        },
-        |f, data, _env| {
-            if f.is_some() {
-                println!("Poradsafds");
-                let (start, end) = data.get_library()[data.get_selected().unwrap()]
-                    .get_physical_page_range()
-                    .unwrap();
-                Box::new(Label::new(format!("Page range: {}-{}", start, end)))
-            } else {
-                Box::new(Label::new(""))
-            }
-        },
-    );
-
     Flex::row()
         .with_child(ocr_button)
         .with_default_spacer()
-        .with_child(reverse_ocr_button)
-        .with_default_spacer()
-        .with_child(reverse_ocr_result_label)
         .with_child(page_counter)
 }
 
