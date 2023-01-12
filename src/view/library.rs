@@ -1,6 +1,6 @@
 use crate::{
     controller::view::BOOK_READ,
-    helper::config::{APP_NAME, COVER_PLACEHOLDER, PADDING_LG, TITLE},
+    helper::config::{APP_NAME, COVER_PLACEHOLDER, PADDING_LG, TITLE, PADDING_SM, RECT_SIZE},
     model::{app_state::AppState, book::Book, ui_view::UiView},
 };
 use druid::{
@@ -8,7 +8,7 @@ use druid::{
         Button, Container, FillStrat, Flex, Image, Label, List, ListIter, MainAxisAlignment,
         Padding, Painter, Scroll, SizedBox, Svg, ViewSwitcher,
     },
-    Color, Command, Data, EventCtx, RenderContext, Target, Widget, WidgetExt,
+    Color, Command, Data, EventCtx, RenderContext, Target, Widget, WidgetExt, Rect
 };
 use std::sync::Arc;
 
@@ -34,7 +34,7 @@ pub fn library() -> Box<dyn Widget<AppState>> {
         );
 
         // Book author
-        let email_text = Label::new(
+        let author = Label::new(
             |(_views, book, _selected, _idx): &(Arc<Vec<UiView>>, Book, Option<usize>, usize),
              _env: &_| { book.get_author() },
         );
@@ -79,19 +79,26 @@ pub fn library() -> Box<dyn Widget<AppState>> {
             },
         );
 
-        // Layout of single book
-        let details = Flex::column().with_child(book_title).with_child(email_text);
-        let layout = Flex::row()
+        // Details and functions of the book
+        let details = Flex::column()
+        .with_child(book_title)
+        .with_spacer(PADDING_SM)
+        .with_child(author)
+        .with_spacer(PADDING_SM)
+        .with_child(progress_switcher);
+
+        //Entire book layout
+        let book_layout = Flex::row()
             .with_child(cover)
-            .with_child(details)
-            .with_child(progress_switcher);
+            .with_spacer(PADDING_SM)
+            .with_child(details);
 
         // Open book on click
         // 1. Make the view arc mutable
         // 2. Add the BookRead view to the views (this will trigger the view switcher)
         // 3. Set the selected book (index) to the current book (index)
         // 4. Send the command to open the book with the index as payload
-        let layout = layout.on_click(|event, data, _env| {
+        let book_layout = book_layout.on_click(|event, data, _env| {
             let new_views = Arc::make_mut(&mut data.0);
             new_views.push(UiView::BookRead);
             data.0 = Arc::new(new_views.to_owned());
@@ -100,10 +107,10 @@ pub fn library() -> Box<dyn Widget<AppState>> {
         });
 
         // Highlight book on hover
-        layout.background(Painter::new(|ctx, _data, _env| {
+        book_layout.background(Painter::new(|ctx, _data, _env| {
             let is_hot = ctx.is_hot();
             let is_active = ctx.is_active();
-            let rect = ctx.size().to_rect();
+            let rect = Rect::with_size(ctx.size().to_rect(), RECT_SIZE);
             let background_color = if is_active {
                 Color::BLACK
             } else if is_hot {
