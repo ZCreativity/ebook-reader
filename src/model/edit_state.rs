@@ -75,10 +75,13 @@ impl ScopeTransfer for EditTransfer {
                     let edited_html = page_to_update.as_str();
 
                     let path_buf = file.to_path_buf();
-                    let file_path = path_buf
-                        .as_os_str()
-                        .to_str()
-                        .expect("Error while retrieving file path");
+                    let file_path = match path_buf.as_os_str().to_str(){
+                        Some(path) => path,
+                        None => {
+                            eprintln!("Error encountered while converting file path to string!");
+                            return;
+                        }
+                    };
                     let dir_file_path = [dir_path, file_path].join("/");
 
                     let epub_path = state.book.get_file_path();
