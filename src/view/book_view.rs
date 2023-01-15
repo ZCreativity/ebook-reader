@@ -35,9 +35,14 @@ pub fn book_view() -> Box<dyn Widget<AppState>> {
         .with_child(book_controls)
         .main_axis_alignment(MainAxisAlignment::End);
 
-    let layout = Flex::column()
+    let top_bar_layout = Flex::column()
         .with_child(top_bar)
         .with_child(reverse_ocr_row)
+        .cross_axis_alignment(CrossAxisAlignment::Start);
+
+    let layout = Flex::column()
+        .with_child(top_bar_layout)
+        .with_spacer(20_f64)
         .with_child(book_text)
         .with_spacer(20_f64)
         .with_child(bottom_bar)
@@ -93,8 +98,7 @@ fn book_menu() -> impl Widget<AppState> {
     flex
 }
 
-fn reverse_ocr_row() -> impl Widget<AppState>{
-
+fn reverse_ocr_row() -> impl Widget<AppState> {
     let reverse_ocr_button = Button::new("Get physical page of this chapter").on_click(
         |_ctx, data: &mut AppState, _env| {
             data.reverse_ocr();
@@ -102,8 +106,9 @@ fn reverse_ocr_row() -> impl Widget<AppState>{
     );
 
     let reverse_ocr_result_label = ViewSwitcher::new(
-        |data: &AppState, _env|
-            data.get_library()[data.get_selected().unwrap()].get_physical_page_range(),
+        |data: &AppState, _env| {
+            data.get_library()[data.get_selected().unwrap()].get_physical_page_range()
+        },
         |f, data, _env| {
             if f.is_some() {
                 let (start, end) = data.get_library()[data.get_selected().unwrap()]
