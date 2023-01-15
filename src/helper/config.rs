@@ -1,4 +1,4 @@
-use druid::{FontDescriptor, FontFamily, FontWeight, Size};
+use druid::{FontDescriptor, FontFamily, FontWeight};
 
 /* UI */
 pub const DISPLAY_WIDTH: f64 = 1280.0;
@@ -15,8 +15,6 @@ pub const TITLE_SIZE: f64 = 24.0;
 pub const TITLE: FontDescriptor = FontDescriptor::new(FontFamily::SANS_SERIF)
     .with_size(TITLE_SIZE)
     .with_weight(FontWeight::BOLD);
-
-pub const RECT_SIZE: Size = Size::new(400.0, 400.0);
 
 /* Data */
 pub const LIBRARY_PATH: &str = "./src/library";

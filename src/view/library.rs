@@ -1,14 +1,14 @@
 use crate::{
     controller::view::BOOK_READ,
-    helper::config::{APP_NAME, COVER_PLACEHOLDER, PADDING_LG, PADDING_SM, RECT_SIZE, TITLE},
+    helper::config::{APP_NAME, COVER_PLACEHOLDER, PADDING_LG, PADDING_SM, TITLE},
     model::{app_state::AppState, book::Book, ui_view::UiView},
 };
 use druid::{
     widget::{
         Button, Container, FillStrat, Flex, Image, Label, List, ListIter, MainAxisAlignment,
-        Padding, Painter, Scroll, SizedBox, Svg, ViewSwitcher,
+        Padding, Scroll, SizedBox, Svg, ViewSwitcher,
     },
-    Color, Command, Data, EventCtx, Rect, RenderContext, Target, Widget, WidgetExt,
+    Command, Data, EventCtx, Target, Widget, WidgetExt,
 };
 use std::sync::Arc;
 
