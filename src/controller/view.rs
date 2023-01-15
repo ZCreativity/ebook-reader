@@ -38,7 +38,7 @@ impl ViewController<UiView> for AppState {
     }
 
     fn current_view(&self) -> &UiView {
-        self.nav_state.last().unwrap()
+        self.nav_state.last().expect("No views in stack")
     }
 
     fn len(&self) -> usize {

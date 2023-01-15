@@ -210,7 +210,7 @@ impl AppState {
         let book = self
             .library
             .get(self.selected.unwrap_or(1))
-            .expect("Unable to get library");
+            .expect("Unable to get book");
         book.has_next_page()
     }
 
@@ -234,7 +234,7 @@ impl AppState {
         let library = Arc::make_mut(&mut self.library);
         let book = library
             .get_mut(self.selected.unwrap_or(1))
-            .expect("Unable to get mut library");
+            .expect("Unable to get mut book");
         book.next_page();
     }
 
@@ -246,7 +246,7 @@ impl AppState {
         let library = Arc::make_mut(&mut self.library);
         let book = library
             .get_mut(self.selected.unwrap_or(1))
-            .expect("Unable to get mut library");
+            .expect("Unable to get mut book");
         book.prev_page();
     }
 
@@ -254,7 +254,7 @@ impl AppState {
         let library = Arc::make_mut(&mut self.library);
         let book = library
             .get_mut(self.selected.unwrap_or(1))
-            .expect("Unable to get mut library");
+            .expect("Unable to get mut book");
         book.set_page(page);
     }
 
@@ -266,7 +266,7 @@ impl AppState {
         let library = Arc::make_mut(&mut self.library);
         let book = library
             .get_mut(self.selected.unwrap_or(1))
-            .expect("Unable to get mut library");
+            .expect("Unable to get mut book");
         book.set_page(book.get_book_length());
     }
 
@@ -284,7 +284,7 @@ impl AppState {
         let library = Arc::make_mut(&mut self.library);
         let book = library
             .get_mut(self.selected.unwrap_or(1))
-            .expect("Unable to get mut library");
+            .expect("Unable to get mut book");
         let page_string = book.get_page_str(book.get_current_page());
         match page_string {
             None => {
@@ -305,7 +305,7 @@ impl AppState {
         let library = Arc::make_mut(&mut self.library);
         let book = library
             .get_mut(self.selected.unwrap_or(1))
-            .expect("Unable to get mut library");
+            .expect("Unable to get mut book");
         match book.save_progress() {
             Ok(_) => println!("Saved"),
             Err(err) => eprintln!("Not saved, {}", err),
@@ -356,7 +356,9 @@ impl AppState {
      */
     pub fn reverse_ocr(&mut self) {
         let library = Arc::make_mut(&mut self.library);
-        let book = library.get_mut(self.selected.unwrap()).unwrap();
+        let book = library
+            .get_mut(self.selected.unwrap_or(1))
+            .expect("Unable to get mut book");
         book.reverse_ocr()
     }
 }

@@ -39,7 +39,7 @@ impl Book {
             None
         } else {
             let cover_path = PathBuf::from(cover_path);
-            let bytes = path_to_bytes(cover_path).unwrap();
+            let bytes = path_to_bytes(cover_path).unwrap(); //Unwrap is safe because we already checked if the path is empty
             match ImageBuf::from_data(bytes.as_slice()) {
                 Ok(cover) => Some(Arc::new(cover)),
                 Err(e) => {
@@ -62,7 +62,7 @@ impl Book {
             current_page_index = match file {
                 Ok(file) => {
                     let reader = BufReader::new(file);
-                    let json: usize = serde_json::from_reader(reader).unwrap();
+                    let json: usize = serde_json::from_reader(reader).unwrap(); //Unwrap is safe because we already checked if the file exists
                     json
                 }
                 Err(e) => {
@@ -121,7 +121,7 @@ impl Book {
 
     pub fn get_book_length(&self) -> usize {
         match &self.doc {
-            Some(doc) => doc.lock().unwrap().spine.len() - 1,
+            Some(doc) => doc.lock().expect("Error while getting lock").spine.len() - 1,
             None => 0,
         }
     }
@@ -182,8 +182,8 @@ impl Book {
      */
     pub fn navigate_to(&mut self, link: Rc<String>) {
         self.reset_page_range();
-        let binding = self.get_doc().unwrap();
-        let doc = binding.lock().unwrap();
+        let binding = self.get_doc().expect("Error while getting arc");
+        let doc = binding.lock().expect("Error while getting lock");
 
         // From "chapter_001.xhtml" to resource_id in the spine
         let resource_id = doc
@@ -212,8 +212,8 @@ impl Book {
      * Example: OEBPS/chapter_001.xhtml (relative path to the epub file)
      */
     pub fn get_current_doc_path(&self) -> Option<PathBuf> {
-        let doc = self.get_doc().unwrap();
-        let doc = doc.lock().unwrap();
+        let doc = self.get_doc().expect("Error while getting arc");
+        let doc = doc.lock().expect("Error while getting lock");
         match doc.get_current_path() {
             Ok(path) => Some(path),
             Err(e) => {
@@ -225,8 +225,8 @@ impl Book {
 
     pub fn get_page_str(&self, page_index: usize) -> Option<String> {
         if page_index > 0 && page_index <= self.get_book_length() {
-            let doc = self.get_doc().unwrap();
-            let mut doc_mut = doc.lock().unwrap();
+            let doc = self.get_doc().expect("Error while getting arc");
+            let mut doc_mut = doc.lock().expect("Error while getting lock");
             doc_mut.set_current_page(page_index).unwrap();
             match doc_mut.get_current_str() {
                 Ok(current_str) => Some(current_str),
@@ -245,8 +245,8 @@ impl Book {
      */
     pub fn get_page_from_ocr_text(&self, text: String) -> Option<usize> {
         // Iterate through all the text files in the epub doc
-        let doc = self.get_doc().unwrap();
-        let mut doc_mut = doc.lock().unwrap();
+        let doc = self.get_doc().expect("Error while getting arc");
+        let mut doc_mut = doc.lock().expect("Error while getting lock");
         let mut page_index = 1;
         while page_index <= doc_mut.spine.len() - 1 {
             doc_mut.set_current_page(page_index).unwrap();

@@ -35,7 +35,7 @@ pub fn parse(page: String) -> impl Widget<AppState> {
                 let mut line_str = String::from("");
                 let mut tag_vect = Vec::<RichAnnotation>::new();
 
-                println!("Line: {:?}", line);
+                //println!("Line: {:?}", line);
 
                 //If TaggedLine is not empty but does not have TaggedStrings => skip = true
                 //so that no useless lines are added
