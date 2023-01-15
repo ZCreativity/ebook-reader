@@ -51,20 +51,29 @@ impl AppState {
 
         // Book list
         let mut book_list: Vec<Book> = Vec::new();
+        let covers_path = "./src/library/covers";
+        let ocr_path = "./src/library/ocr";
+        let progress_path = "./src/library/progress";
         if dir.is_some() {
             // Unwrap is safe because we checked if dir is None
             for file in dir.unwrap() {
                 match file {
                     Ok(file) => {
-                        let book = epub_to_book(file.path());
-                        match book {
-                            None => {
-                                eprintln!("Unable to add book {}", file.path().display());
-                            }
-                            Some(book) => {
-                                book_list.push(book);
+                        // Check if file is a directory
+                        if (!file.path().to_str().unwrap().contains(covers_path))
+                            && (!file.path().to_str().unwrap().contains(ocr_path))
+                            && (!file.path().to_str().unwrap().contains(progress_path)){
+                            let book = epub_to_book(file.path());
+                            match book {
+                                None => {
+                                    eprintln!("Unable to add book {}", file.path().display());
+                                }
+                                Some(book) => {
+                                    book_list.push(book);
+                                }
                             }
                         }
+                        
                     }
                     Err(err) => {
                         eprintln!("Error: {:?}", err);

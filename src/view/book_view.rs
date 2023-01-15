@@ -65,7 +65,7 @@ fn book_menu() -> impl Widget<AppState> {
         data.set_editing_page();
         event.submit_command(Command::new(
             BOOK_EDIT,
-            data.get_selected().unwrap(),
+            data.get_selected().expect("No book selected"),
             Target::Auto,
         ));
     });
@@ -214,8 +214,8 @@ fn book_page() -> impl Widget<AppState> {
     let page_switcher = ViewSwitcher::new(
         |data: &AppState, _env| data.get_library()[data.get_selected().unwrap()].get_current_page(),
         |page_index, data, _env| {
-            let page = data.get_library()[data.get_selected().unwrap()].get_page_str(*page_index);
-            let parsed_page = parse(page.unwrap());
+            let page = data.get_library()[data.get_selected().expect("No book selected")].get_page_str(*page_index);
+            let parsed_page = parse(page.expect("No page found"));
             Box::new(parsed_page)
         },
     );

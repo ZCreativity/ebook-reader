@@ -302,8 +302,14 @@ impl Book {
         let json = serde_json::to_string(&self.current_page_index)?;
         let saved_progress_path =
             SAVED_PROGRESS_PATH.to_owned() + &self.title.as_str().replace(" ", "-") + ".json";
-        let mut file = File::create(saved_progress_path)?;
-        file.write_all(json.as_bytes())?;
+        let mut file = match File::create(saved_progress_path){
+            Ok(file) => file,
+            Err(e) => {
+                eprintln!("Error creating file json: {}", e);
+                return Err(Box::new(e));
+            }
+        };
+        file.write_all(json.as_bytes()).expect("Error writing json");
         self.set_has_progress();
         Ok(())
     }

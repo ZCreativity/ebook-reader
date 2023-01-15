@@ -46,12 +46,12 @@ pub fn library() -> Box<dyn Widget<AppState>> {
             move |f, data, _env| {
                 if *f {
                     Box::new(
-                        Image::new(data.1.get_image_buf().as_ref().unwrap().as_ref().clone())
+                        Image::new(data.1.get_image_buf().as_ref().unwrap().as_ref().clone()) //Unwrap is safe because the image is checked
                             .fix_size(100.0, 200.0),
                     )
                 } else {
                     Box::new(
-                        Svg::new(COVER_PLACEHOLDER.parse().unwrap()).fill_mode(FillStrat::Fill),
+                        Svg::new(COVER_PLACEHOLDER.parse().unwrap()).fill_mode(FillStrat::Fill), //Unwrap is safe because the missing-cover is hardcoded
                     )
                 }
             },
@@ -106,21 +106,7 @@ pub fn library() -> Box<dyn Widget<AppState>> {
             event.submit_command(Command::new(BOOK_READ, data.3, Target::Auto));
         });
 
-        // Highlight book on hover
-        book_layout.background(Painter::new(|ctx, _data, _env| {
-            let is_hot = ctx.is_hot();
-            let is_active = ctx.is_active();
-            let rect = Rect::with_size(ctx.size().to_rect(), RECT_SIZE);
-            let background_color = if is_active {
-                Color::BLACK
-            } else if is_hot {
-                Color::BLACK
-            } else {
-                Color::TRANSPARENT
-            };
-            ctx.stroke(rect, &background_color, 0.);
-            ctx.fill(rect, &background_color);
-        }))
+        book_layout
     });
 
     // Layout of the page
