@@ -277,8 +277,8 @@ impl Book {
         let word_count_till_page = word_count_chapter.iter().take(page + 1).sum::<i32>();
         let page_range_start = word_count_till_page / 450;
         let page_range_end = word_count_till_page / 300;
-        println!("Page range start: {}", page_range_start);
-        println!("Page range end: {}", page_range_end);
+        //println!("Page range start: {}", page_range_start);
+        //println!("Page range end: {}", page_range_end);
         // +1 because the page 0 on a physical book has weird numbering
         self.set_physical_page_range((page_range_start + 1, page_range_end + 1));
     }

@@ -89,7 +89,7 @@ pub fn parse(page: String) -> impl Widget<AppState> {
                         match tag {
                             Default => {}
                             Link(link_value) => {
-                                println!("link_value: {:?}", link_value);
+                                //println!("link_value: {:?}", link_value);
                                 let link = link(
                                     line_str.as_str(),
                                     h,
