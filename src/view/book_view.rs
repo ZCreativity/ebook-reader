@@ -107,13 +107,13 @@ fn reverse_ocr_row() -> impl Widget<AppState> {
 
     let reverse_ocr_result_label = ViewSwitcher::new(
         |data: &AppState, _env| {
-            data.get_library()[data.get_selected().unwrap()].get_physical_page_range()
+            data.get_library()[data.get_selected().unwrap_or(1)].get_physical_page_range()
         },
         |f, data, _env| {
             if f.is_some() {
-                let (start, end) = data.get_library()[data.get_selected().unwrap()]
+                let (start, end) = data.get_library()[data.get_selected().unwrap_or(1)]
                     .get_physical_page_range()
-                    .unwrap();
+                    .unwrap(); // Here we unwrap because we know that the view switcher will only be called if the value is Some
                 Box::new(Label::new(format!("Page range: {}-{}", start, end)))
             } else {
                 Box::new(Label::new(""))

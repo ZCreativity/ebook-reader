@@ -217,5 +217,5 @@ pub fn h_font_size(h: i32) -> f64 {
         (6, 10.72_f64),
     ]);
 
-    *h_sizes.get(&h).unwrap()
+    *h_sizes.get(&h).unwrap_or(&10.72_f64)
 }

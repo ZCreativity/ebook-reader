@@ -52,16 +52,24 @@ impl AppState {
         // Book list
         let mut book_list: Vec<Book> = Vec::new();
         if dir.is_some() {
+            // Unwrap is safe because we checked if dir is None
             for file in dir.unwrap() {
-                let book = epub_to_book(file.as_ref().unwrap().path());
-                match book {
-                    None => {
-                        eprintln!("Unable to add book {}", file.unwrap().path().display());
+                match file {
+                    Ok(file) => {
+                        let book = epub_to_book(file.path());
+                        match book {
+                            None => {
+                                eprintln!("Unable to add book {}", file.path().display());
+                            }
+                            Some(book) => {
+                                book_list.push(book);
+                            }
+                        }
                     }
-                    Some(book) => {
-                        book_list.push(book);
+                    Err(err) => {
+                        eprintln!("Error: {:?}", err);
                     }
-                }
+                };
             }
             return book_list;
         }
@@ -84,7 +92,12 @@ impl AppState {
         };
 
         let book = epub_to_book(path.clone());
-        let filename = path.file_name().unwrap().to_str().unwrap().to_string();
+        let filename = path
+            .file_name()
+            .expect("Unable to read file name")
+            .to_str()
+            .expect("Unable to read filename")
+            .to_string();
         let to = format!("{}/{}", LIBRARY_PATH, filename);
         let result = fs::copy(path, to);
         match result {
@@ -111,14 +124,21 @@ impl AppState {
     }
 
     fn add_book(&mut self, path: Option<PathBuf>) {
-        let book = epub_to_book(path.unwrap());
-        match book {
-            Some(book) => {
-                let library = Arc::make_mut(&mut self.library);
-                library.push(book);
+        match path {
+            Some(path) => {
+                let book = epub_to_book(path);
+                match book {
+                    Some(book) => {
+                        let library = Arc::make_mut(&mut self.library);
+                        library.push(book);
+                    }
+                    None => {
+                        eprintln!("Error adding the book")
+                    }
+                }
             }
             None => {
-                eprintln!("Error adding the book")
+                eprintln!("No book selected")
             }
         }
     }
@@ -176,7 +196,9 @@ impl AppState {
         }
         // Call the navigate_to method of the selected book
         let library = Arc::make_mut(&mut self.library);
-        let book = library.get_mut(self.selected.unwrap()).unwrap();
+        let book = library
+            .get_mut(self.selected.unwrap_or(1))
+            .expect("Unable to get mut library");
         book.navigate_to(link);
     }
 
@@ -185,8 +207,10 @@ impl AppState {
             return false;
         }
         // Call the has_next_page method of the selected book
-        let library = self.library.clone();
-        let book = library.get(self.selected.unwrap()).unwrap();
+        let book = self
+            .library
+            .get(self.selected.unwrap_or(1))
+            .expect("Unable to get library");
         book.has_next_page()
     }
 
@@ -195,8 +219,10 @@ impl AppState {
             return false;
         }
         // Call the has_prev_page method of the selected book
-        let library = self.library.clone();
-        let book = library.get(self.selected.unwrap()).unwrap();
+        let book = self
+            .library
+            .get(self.selected.unwrap_or(1))
+            .expect("Unable to get library");
         book.has_prev_page()
     }
 
@@ -206,7 +232,9 @@ impl AppState {
         }
         // Call the navigate_to_next_page method of the selected book
         let library = Arc::make_mut(&mut self.library);
-        let book = library.get_mut(self.selected.unwrap()).unwrap();
+        let book = library
+            .get_mut(self.selected.unwrap_or(1))
+            .expect("Unable to get mut library");
         book.next_page();
     }
 
@@ -216,13 +244,17 @@ impl AppState {
         }
         // Call the navigate_to_prev_page method of the selected book
         let library = Arc::make_mut(&mut self.library);
-        let book = library.get_mut(self.selected.unwrap()).unwrap();
+        let book = library
+            .get_mut(self.selected.unwrap_or(1))
+            .expect("Unable to get mut library");
         book.prev_page();
     }
 
     pub fn navigate_to_page_index(&mut self, page: usize) {
         let library = Arc::make_mut(&mut self.library);
-        let book = library.get_mut(self.selected.unwrap()).unwrap();
+        let book = library
+            .get_mut(self.selected.unwrap_or(1))
+            .expect("Unable to get mut library");
         book.set_page(page);
     }
 
@@ -232,7 +264,9 @@ impl AppState {
 
     pub fn navigate_to_last_page(&mut self) {
         let library = Arc::make_mut(&mut self.library);
-        let book = library.get_mut(self.selected.unwrap()).unwrap();
+        let book = library
+            .get_mut(self.selected.unwrap_or(1))
+            .expect("Unable to get mut library");
         book.set_page(book.get_book_length());
     }
 
@@ -248,7 +282,9 @@ impl AppState {
         }
         // Call the set_editing_page method of the selected book
         let library = Arc::make_mut(&mut self.library);
-        let book = library.get_mut(self.selected.unwrap()).unwrap();
+        let book = library
+            .get_mut(self.selected.unwrap_or(1))
+            .expect("Unable to get mut library");
         let page_string = book.get_page_str(book.get_current_page());
         match page_string {
             None => {
@@ -267,7 +303,9 @@ impl AppState {
             return;
         }
         let library = Arc::make_mut(&mut self.library);
-        let book = library.get_mut(self.selected.unwrap()).unwrap();
+        let book = library
+            .get_mut(self.selected.unwrap_or(1))
+            .expect("Unable to get mut library");
         match book.save_progress() {
             Ok(_) => println!("Saved"),
             Err(err) => eprintln!("Not saved, {}", err),
@@ -289,7 +327,7 @@ impl AppState {
                 match text {
                     Ok(text) => {
                         println!("Text: {}", text);
-                        let book = self.get_library()[self.get_selected().unwrap()].clone();
+                        let book = self.get_library()[self.get_selected().unwrap_or(1)].clone();
                         let page = book.get_page_from_ocr_text(text.trim().to_string());
                         println!("Page: {:?}", page);
                         match page {

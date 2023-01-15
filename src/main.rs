@@ -19,5 +19,5 @@ fn main() {
     AppLauncher::with_window(window)
         .log_to_console()
         .launch(app_state)
-        .unwrap();
+        .expect("Failed to launch app");
 }

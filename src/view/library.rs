@@ -1,6 +1,6 @@
 use crate::{
     controller::view::BOOK_READ,
-    helper::config::{APP_NAME, COVER_PLACEHOLDER, PADDING_LG, TITLE, PADDING_SM, RECT_SIZE},
+    helper::config::{APP_NAME, COVER_PLACEHOLDER, PADDING_LG, PADDING_SM, RECT_SIZE, TITLE},
     model::{app_state::AppState, book::Book, ui_view::UiView},
 };
 use druid::{
@@ -8,7 +8,7 @@ use druid::{
         Button, Container, FillStrat, Flex, Image, Label, List, ListIter, MainAxisAlignment,
         Padding, Painter, Scroll, SizedBox, Svg, ViewSwitcher,
     },
-    Color, Command, Data, EventCtx, RenderContext, Target, Widget, WidgetExt, Rect
+    Color, Command, Data, EventCtx, Rect, RenderContext, Target, Widget, WidgetExt,
 };
 use std::sync::Arc;
 
@@ -81,11 +81,11 @@ pub fn library() -> Box<dyn Widget<AppState>> {
 
         // Details and functions of the book
         let details = Flex::column()
-        .with_child(book_title)
-        .with_spacer(PADDING_SM)
-        .with_child(author)
-        .with_spacer(PADDING_SM)
-        .with_child(progress_switcher);
+            .with_child(book_title)
+            .with_spacer(PADDING_SM)
+            .with_child(author)
+            .with_spacer(PADDING_SM)
+            .with_child(progress_switcher);
 
         //Entire book layout
         let book_layout = Flex::row()
