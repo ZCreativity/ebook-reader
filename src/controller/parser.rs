@@ -12,6 +12,12 @@ use html2text::{
 
 use crate::{helper::config::DEFAULT_FONT_SIZE, model::app_state::AppState};
 
+/**
+ * Parses a string (in html format) and returns a widget that can be used to display the text
+ * The html text is parsed using the html2text crate.
+ * Every element of the html is at the end converted to a Label widget with specific styling
+ * based on the html tag.
+ */
 pub fn parse(page: String) -> impl Widget<AppState> {
     let view_switcher = ViewSwitcher::new(
         |data: &AppState, _env| data.get_font_size(),

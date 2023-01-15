@@ -102,6 +102,7 @@ impl Book {
         }
     }
 
+    /** Getters */
     pub fn get_image_buf(&self) -> Option<Arc<ImageBuf>> {
         self.cover.as_ref().cloned()
     }
@@ -125,6 +126,24 @@ impl Book {
         }
     }
 
+    pub fn get_file_path(&self) -> String {
+        self.file_path.clone()
+    }
+
+    pub fn get_word_count(&self) -> Arc<Vec<i32>> {
+        self.word_count_chapters.clone()
+    }
+
+    pub fn get_current_page_str(&self) -> String {
+        self.current_page_str.clone()
+    }
+
+    /** Edit */
+    pub fn set_page_str(&mut self, page_str: String) {
+        self.current_page_str = page_str;
+    }
+
+    /** Book navigation methods */
     pub fn get_current_page(&self) -> usize {
         self.current_page_index
     }
@@ -154,22 +173,6 @@ impl Book {
     pub fn set_page(&mut self, page_index: usize) {
         self.reset_page_range();
         self.current_page_index = page_index;
-    }
-
-    pub fn get_current_page_str(&self) -> String {
-        self.current_page_str.clone()
-    }
-
-    pub fn set_page_str(&mut self, page_str: String) {
-        self.current_page_str = page_str;
-    }
-
-    pub fn get_file_path(&self) -> String {
-        self.file_path.clone()
-    }
-
-    pub fn get_word_count(&self) -> Arc<Vec<i32>> {
-        self.word_count_chapters.clone()
     }
 
     /**

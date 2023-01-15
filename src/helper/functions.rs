@@ -46,7 +46,7 @@ pub fn path_to_bytes(path: PathBuf) -> Option<Vec<u8>> {
 }
 
 /**
-Converts an .epub file into the Book struct
+ * Converts an .epub file into the Book struct
  */
 pub fn epub_to_book(path: PathBuf) -> Option<Book> {
     let filename = path.file_name().unwrap().to_str().unwrap().to_string();

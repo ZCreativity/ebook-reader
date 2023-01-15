@@ -3,8 +3,10 @@ use crate::model::{app_state::AppState, ui_view::UiView};
 use druid::{widget::Controller, Env, Event, Widget};
 use druid_widget_nursery::navigator::{Navigator, ViewController};
 
-// this controller will handle commands like POP_VIEW whenever a child widget does not
-// have access to AppState
+/**
+ * NavigatorController
+ * Handles events for the Navigator widget.
+ */
 pub struct NavigatorController;
 
 impl Controller<AppState, Navigator<AppState, UiView>> for NavigatorController {

@@ -130,13 +130,6 @@ impl AppState {
         self.library.clone()
     }
 
-    // /**
-    //  * Set the library (when editing a book, then save to file)
-    //  */
-    // pub fn set_library(&mut self, library: Arc<Vec<Book>>) {
-    //     self.library = library;
-    // }
-
     /**
      * Get reference to the selected book
      */
@@ -243,6 +236,12 @@ impl AppState {
         book.set_page(book.get_book_length());
     }
 
+    /** EDIT */
+
+    /**
+     * Sets the current page as the editing page, in order to be
+     * displayed in the editor
+     */
     pub fn set_editing_page(&mut self) {
         if self.selected.is_none() {
             return;
@@ -276,6 +275,12 @@ impl AppState {
     }
 
     /** OCR */
+
+    /**
+     * Open a native dialog to select an image file
+     * then run OCR on it, extract the text and find the page where
+     * text is located
+     */
     pub fn ocr_from_file(&mut self) {
         let selected_file = open_native_dialog_images();
         match selected_file {
