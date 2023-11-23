@@ -1,20 +1,20 @@
-# Definizione del problema
+# Problem Definition
 
-Un ebook reader è un programma basato su GUI che permette ad un utente di aprirefile contenenti libri da visualizzare pagina per pagine, con la possibilità di tenere traccia del punto in cui si è arrivati, cambiare la grandezza del font, visualizzare a pagina singola o doppia, ecc.
+An ebook reader is a GUI-based program that allows a user to open files containing books for viewing page by page, with the ability to keep track of the reading progress, change font size, display in single or double page mode, etc.
 
-# Obiettivi
+# Objectives
 
-L’obiettivo primario è quello di sviluppare un programma per la gestione di libri in formato EPUB, lavorando con la libreria Rust DRUID (vedere link nelle referenze). Si cerchi di personalizzare al massimo l’interazione con l’utente, eventualmente sfruttando eventualmente altri programmi come riferimento (sia per funzionalità di base, sia per difetti da migliorare). La strutturazione del codice faccia ampio uso di test per sviluppare e verificare le singole funzionalità. Inoltre, si permetta all’utente di attivare una modalità “correttore di bozza” che consenta di modificare il contenuto in presenza di errori (esempio errori di battitura), andando a generare un nuovo file ad ogni salvataggio. Il secondo obiettivo è quello di integrare il sistema di fotocamera con OCR(vedere il link in reference) per mettere insieme il possesso del libro in formato cartaceo con quello in digitale in uno dei seguenti modi:
+The primary objective is to develop a program for managing EPUB format books, using the Rust DRUID library (see link in references). Aim to customize the user interaction to the maximum extent possible, potentially leveraging other programs as a reference (both for basic functionality and for improving shortcomings). The code structure should extensively use tests to develop and verify individual functionalities. Additionally, allow the user to activate a "draft correction" mode that enables editing the content in the presence of errors (e.g., typos), generating a new file with each save. The second objective is to integrate the camera system with OCR (see link in reference) to merge possession of the paper book with the digital one in one of the following ways:
 
-1.  Dal libro che si stava leggendo su carta, saltare al punto a cui si è arrivati facendo la foto alla pagina
-2.  Operare l’inverso, cioè da due pagine riconosciute indicare a che pagina si trova il testo a cui si è arrivati sulla versione digitale.
+1. Jump from the paper book being read to the point reached by taking a photo of the page.
+2. Perform the reverse, i.e., from two recognized pages, indicate which page corresponds to the text reached in the digital version.
 
-# Contatti
+# Contacts
 
 Prof. Alessandro Savino
 
-# Referenze:
+# References:
 
 - DRUID: https://github.com/linebender/druid
-- Libri privi di copyright (legali): https://www.gutenberg.org
-- Metodi di OCR con RUST: https://www.linkedin.com/pulse/ocr-rustleptess-tesseract-ha%C3%AFkel-ouaghrem/
+- Public domain books (legal): https://www.gutenberg.org
+- OCR methods with RUST: https://www.linkedin.com/pulse/ocr-rustleptess-tesseract-ha%C3%AFkel-ouaghrem/
